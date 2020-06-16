@@ -106,9 +106,6 @@ ax.YColor = 'black';
 ax.XColor = 'black';
 state_fig_discrete.InvertHardcopy = 'off';
 
-
-
-
 saveas(state_fig_discrete,[FigPath 'emergent_binding_plot_discrete.png'])
 saveas(state_fig_discrete,[FigPath 'emergent_binding_plot_discrete.pdf'])
 

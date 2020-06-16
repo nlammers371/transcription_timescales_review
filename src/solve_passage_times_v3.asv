@@ -253,28 +253,28 @@ ton(n_med+2) = 0;
 
 syms toff [n_bs+1 1]
 toff(n_med) = 0;
-tic
+
 for e = 1:length(eb_vals)
   % calculate effective off rates (5->3)
   
   % independent
   q_ind = q_ind_array(:,:,e)';
-  eff_kon_ind_vec(e) = 1/pt_solve(q_ind,n_med+2,n_med);
-  eff_koff_ind_vec(e) = 1/pt_solve(q_ind,n_med,n_med+2);
+  eff_kon_ind_vec(e) = 1/pt_solve(q_ind,n_med+1,n_med-1);
+  eff_koff_ind_vec(e) = 1/pt_solve(q_ind,n_med-1,n_med+1);
   
   % koff coop
   q_koff = q_coop_off_array(:,:,e)';
-  eff_kon_off_coop_vec(e) = 1/pt_solve(q_koff,n_med+2,n_med);
-  eff_koff_off_coop_vec(e) = 1/pt_solve(q_koff,n_med,n_med+2);
+  eff_kon_off_coop_vec(e) = 1/pt_solve(q_koff,n_med+1,n_med-1);
+  eff_koff_off_coop_vec(e) = 1/pt_solve(q_koff,n_med-1,n_med+1);
   
   % kon coop
   q_kon = q_coop_on_array(:,:,e)';
-  eff_kon_on_coop_vec(e) = 1/pt_solve(q_kon,n_med+2,n_med);
-  eff_koff_on_coop_vec(e) = 1/pt_solve(q_kon,n_med,n_med+2);
+  eff_kon_on_coop_vec(e) = 1/pt_solve(q_kon,n_med+1,n_med-1);
+  eff_koff_on_coop_vec(e) = 1/pt_solve(q_kon,n_med-1,n_med+1);
   
 end
 
-toc
+
 
 
 

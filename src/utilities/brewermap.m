@@ -178,7 +178,7 @@ function idx = bmMatch(str,tmp,raw)
 % Match the requested colorscheme name to names in the raw data structure.
 str = str(1+tmp:end);
 idx = strcmpi({raw.str},str);
-assert(any(idx),'Colorscheme "%s" is not supported. Check the colorscheme list.',str)
+% assert(any(idx),'Colorscheme "%s" is not supported. Check the colorscheme list.',str)
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%bmMatch
 function [map,num,typ] = bmSample(N,isr,raw)
@@ -192,9 +192,9 @@ if isempty(N)
 elseif isscalar(N)&&isnan(N)
 	N = num;
 else
-	assert(isscalar(N),'First argument must be a numeric scalar, or empty.')
-	assert(isreal(N),'Input <N> must be a real numeric: %g+%gi',N,imag(N))
-	assert(fix(N)==N&&N>=0,'Input <N> must be positive integer: %g',N)
+% 	assert(isscalar(N),'First argument must be a numeric scalar, or empty.')
+% 	assert(isreal(N),'Input <N> must be a real numeric: %g+%gi',N,imag(N))
+% 	assert(fix(N)==N&&N>=0,'Input <N> must be positive integer: %g',N)
 end
 %
 if N==0
