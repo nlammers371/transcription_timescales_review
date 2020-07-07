@@ -1,0 +1,45 @@
+% script to simulate burst time series with parameters from analytic
+% calculations
+clear
+close all
+cd('C:\Users\nlamm\projects\transcription_timescales_review\src')
+addpath('utilities')
+
+% load numeric results
+project = 'n6';
+addpath('utilities')
+
+% set paths
+DataPath = ['../out/emergent_bursting/' project '/'];
+
+% load data
+load([DataPath 'bursting_calc_struct.mat'])
+
+% set stochastic simulation parameters
+n_sim = 10; % number of indivudal traces to simulate
+t_sim = 60*60; % duration of each simulation (in seconds)
+n_calc_points = size(bursting_calc_struct(1).state_prob_array,2);
+
+% simulate traces for each set of conditions
+bursting_sim_struct = struct;
+
+% set seed for consistency
+rng('shuffle')
+
+for i = 1:length(bursting_calc_struct)  
+  % record key info
+  bursting_sim_struct(i).simIndices = simIndices;  
+  bursting_sim_struct(i).name = bursting_calc_struct(i).name;
+  for p = 1:length(simIndices)
+    % record network characteristics
+    bursting_sim_struct(i).Q(:,:,p) = bursting_calc_struct(i).rate_array(:,:,simIndices(p));
+    bursting_sim_struct(i).SS(:,p) = bursting_calc_struct(i).state_prob_array(:,simIndices(p));
+    % call sim function
+    tic
+    [bursting_sim_struct(i).sim_state_cell(p,:), bursting_sim_struct(i).sim_time_cell(p,:)] = ...
+          stochastic_sim_fun(bursting_sim_struct(i).Q(:,:,p), bursting_sim_struct(i).SS(:,p), n_sim,t_sim);
+    toc
+  end
+end
+
+save([DataPath, 'bursting_sim_struct.mat'],'bursting_sim_struct');
