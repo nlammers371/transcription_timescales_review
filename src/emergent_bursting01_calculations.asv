@@ -21,10 +21,7 @@ n_mol = 6.02214076e23;
 kb = 1.38064852e-23;
 T = 300;
 deltaGScale = 5000 /n_mol/kb/T;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% (1) Calculations for simple chain model with and without cooperativity
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% (1) Calculations for simple chain model with and without cooperativity
 
 % Since we are assuming that our system is a linear markov chain, it follows 
 % that the chain must be in thermodynamic equilbrium. Thus we will take 
@@ -167,34 +164,29 @@ bursting_chain_calc_struct(1).name = 'independent';
 bursting_chain_calc_struct(1).Q = Q_ind_array;
 bursting_chain_calc_struct(1).eff_on_states = calc_vec;
 bursting_chain_calc_struct(1).eff_rates = [1./eff_ton_ind_vec' 1./eff_toff_ind_vec'];
-
+bursting_chain_calc_struct(1).emission_vec = n_bound_vec;
 % kon-mediated cooperative binding/unbinding 
 bursting_chain_calc_struct(2).name = 'kon-mediated cooperativity';
 bursting_chain_calc_struct(2).Q = Q_coop_on_array;
 bursting_chain_calc_struct(2).eff_on_states = calc_vec;
 bursting_chain_calc_struct(2).eff_rates = [1./eff_ton_on_coop_vec' 1./eff_toff_on_coop_vec'];
-
+bursting_chain_calc_struct(2).emission_vec = n_bound_vec;
 % koff-mediated cooperative binding/unbinding 
 bursting_chain_calc_struct(3).name = 'koff-mediated cooperativity';
 bursting_chain_calc_struct(3).Q = Q_coop_off_array;
 bursting_chain_calc_struct(3).eff_on_states = calc_vec;
 bursting_chain_calc_struct(3).eff_rates = [1./eff_ton_off_coop_vec' 1./eff_toff_off_coop_vec'];
+bursting_chain_calc_struct(3).emission_vec = n_bound_vec;
 
 % generic fields
 for i = 1:3
-  bursting_chain_calc_struct(i).emission_vec = n_bound_vec;
-  bursting_chain_calc_struct(i).off_rate_basal = off_rate_basal;
-  bursting_chain_calc_struct(i).on_rate_basal_vec = on_rate_basal_vec;
-  bursting_chain_calc_struct(i).activatorEnergies = activatorEnergies;
-  bursting_chain_calc_struct(i).coopEnergies = coopEnergies;
+  bursting_chain_calc_struct(n).emission_vec = n_bound_vec;
+  bursting_step_calc_struct(n).off_rate_basal = off_rate_basal;
+  bursting_step_calc_struct(n).on_rate_basal_vec = on_rate_basal_vec;
+  bursting_step_calc_struct(n).activatorEnergies = activatorEnergies;
+  bursting_step_calc_struct(n).coopEnergies = coopEnergies;
 end
-save([DataPath, 'bursting_chain_calc_struct.mat'],'bursting_chain_calc_struct');
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% (2) generate transition rate matrices for rate-limiting step models
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% (2) generate transition rate matrices for rate-limiting step models
 
 % now calculate metrics for (c)
 ind_state_vec = [1 n_calc_points]; % define the two states to lie at the extrema
