@@ -1,14 +1,15 @@
-function [sim_state_cell, sim_time_cell] = stochastic_sim_fun(Q,ss_vec,n_sim,t_sim)
+function [sim_state_cell, sim_emission_cell, sim_time_cell] = stochastic_sim_fun(Q,ss_vec,emission_vec,n_sim,t_sim)
 
   % state options
   state_option_vec = 1:size(Q,1);
   
   % initialize cell arrays
   sim_state_cell = cell(1,n_sim);
+  sim_emission_cell = cell(1,n_sim);
   sim_time_cell = cell(1,n_sim);
   
   % iterate
-  for n = 1:n_sim
+  parfor n = 1:n_sim
       state_val_vec = [randsample(state_option_vec,1,true,ss_vec)];
       jump_time_vec = [0];
       t_curr = 0;
@@ -31,5 +32,6 @@ function [sim_state_cell, sim_time_cell] = stochastic_sim_fun(Q,ss_vec,n_sim,t_s
           t_curr = t_next;
       end
       sim_state_cell{n} = state_val_vec;    
+      sim_state_cell{n} = emission_vec(state_val_vec);    
       sim_time_cell{n} = jump_time_vec;
   end  
