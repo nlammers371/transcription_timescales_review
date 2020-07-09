@@ -210,14 +210,15 @@ slow_kinetics_array = [1./eff_ton_on_coop_vec' 1./eff_ton_off_coop_vec'];
 % iterate through different numbers of rate-limiting steps
 bursting_step_calc_struct = struct;
 
-for n = 1:max_num_rate_lim_steps
+for n =1:max_num_rate_lim_steps
   
   % generate transcription rate vec
   emission_vec = repmat(n_bound_vec,1,n+1);
   
   % initialize array to store rate matrics
   Q_rate_lim_array = zeros((n+1)*n_states,(n+1)*n_states,n_calc_points); % on rate-mediated
-
+  P_lim_array = NaN(n_states,n_calc_points);
+  P_lim_array_full = NaN((n+1)*n_states,n_calc_points);
   % indexing vec for convenience
   sub_vec = 1:n_states;
 
@@ -226,7 +227,19 @@ for n = 1:max_num_rate_lim_steps
     % extract component rate arrays
     QON = Q_ind_array(:,:,ind_state_vec(1));
     QOFF = Q_ind_array(:,:,ind_state_vec(2));
-
+    
+    % estimate expected effective occupancies (assuming strong timescale
+    % separation)
+    SSON = P_ind_array(:,ind_state_vec(1));
+    SSOFF = P_ind_array(:,ind_state_vec(2));
+    
+    % effective ss
+    pon = slow_kinetics_array(eb,1)/(slow_kinetics_array(eb,2)+slow_kinetics_array(eb,1));
+    P_lim_array(:,eb) = SSON*pon + SSOFF*(1-pon);
+    
+    % full ss (same dims as Q)
+    P_lim_array_full(:,eb) = [repmat(SSOFF/n*(1-pon),n,1) ; SSON*pon];
+    
     % initialize combined rate array
     Q_slice = Q_rate_lim_array(:,:,eb);
     
@@ -243,7 +256,7 @@ for n = 1:max_num_rate_lim_steps
             
     end
     % add "ON" block
-    Q_slice(sub_vec+n*n_states,sub_vec+n*n_states) = QOFF';
+    Q_slice(sub_vec+n*n_states,sub_vec+n*n_states) = QON';
     linear_indices = sub2ind(size(Q_slice),sub_vec,sub_vec+n*n_states);
     Q_slice(linear_indices) = slow_kinetics_array(eb,2);
     
@@ -254,10 +267,14 @@ for n = 1:max_num_rate_lim_steps
   end
   
   % record
-  bursting_step_calc_struct(n).Q = Q_rate_lim_array;  
+  bursting_step_calc_struct(n).name = [num2str(n) 'rate-limiting steps'];
+  bursting_step_calc_struct(n).Q = Q_rate_lim_array; 
+  bursting_step_calc_struct(n).SS = P_lim_array; 
+  bursting_step_calc_struct(n).SSFull =P_lim_array_full;
+  bursting_step_calc_struct(n).edge = P_lim_array(1,:)+P_lim_array(end,:); 
   bursting_step_calc_struct(n).eff_on_states = calc_vec;
   bursting_step_calc_struct(n).eff_rates = [1./eff_ton_off_coop_vec' 1./eff_toff_off_coop_vec'];
-  bursting_step_calc_struct(n).emission_vec = emission_vec;
+  bursting_step_calc_struct(n).E = emission_vec;
   bursting_step_calc_struct(n).off_rate_basal = off_rate_basal;
   bursting_step_calc_struct(n).on_rate_basal_vec = on_rate_basal_vec;
   bursting_step_calc_struct(n).activatorEnergies = activatorEnergieArray;
