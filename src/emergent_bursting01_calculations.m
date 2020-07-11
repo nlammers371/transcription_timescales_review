@@ -54,7 +54,7 @@ end
 mu_vec = -log(mult_vec); % energy contribution from state multiplicities
 
 % specify different binding energies to explore
-ebMax = 3; % in kbT units
+ebMax = 4; % in kbT units
 activatorEnergieArray(1,:) = linspace(-ebMax,ebMax,n_calc_points); 
 
 % specify magnitude of binding synergy
@@ -202,7 +202,7 @@ save([DataPath, 'bursting_chain_calc_struct.mat'],'bursting_chain_calc_struct');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % now calculate metrics for (c)
-ind_state_vec = [1 n_calc_points]; % define the two states to lie at the extrema
+ind_state_vec = [26 176]; % define the two states to lie at the extrema
 
 % set range of switching kinetics to explore
 slow_kinetics_array = [1./eff_ton_on_coop_vec' 1./eff_ton_off_coop_vec']; 
