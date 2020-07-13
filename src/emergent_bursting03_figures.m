@@ -2,7 +2,6 @@
 % analytic results
 clear
 close all
-cd('C:\Users\nlamm\projects\transcription_timescales_review\src')
 addpath('utilities')
 
 % load numeric results
@@ -17,75 +16,56 @@ DataPath = ['../out/emergent_bursting/' project '/'];
 
 % load data
 load([DataPath 'bursting_sim_struct.mat'])
-load([DataPath 'bursting_calc_struct.mat'])
+load([DataPath 'bursting_chain_calc_struct.mat'])
 
 % set basic plot parameters
 t_max = 60;
-ylTrace = [-0.01 1.01];
+ylimTrace = [-0.5 6.5];
+n_bound_vec = 0:n_bcd_sites;
+
+% sim name cell
+sim_name_cell = {bursting_sim_struct.name};
+
 % define colors
-blue = [ 0.5529    0.6275    0.7961];
-red = [0.9882    0.5529    0.3843];
+blue = [190 201 224]/255;
+red = [246 141 100]/255;
+green = [203 220 170]/255;
+gray = [0.7020    0.7020    0.7020];
+cmap1 = [green ; blue ;red];
+
+% define resampling time res
+resamp_freq = 1; % 1/seconds
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (a) independent binding (null model)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-close all
-% blue = .7*[27 117 188]/256 + .3*[1 1 1];
 
 % specify appropriate index
-ind_sim_index = 1;
+ind_sim_index = find(contains(sim_name_cell,'independent'));
 
 %  extract n bound vec
-n_bound_vec = bursting_calc_struct(ind_sim_index).n_bound_vec;
-ind_plot_indices = 1:2:size(bursting_sim_struct(ind_sim_index).SS,2);
-
-% plot probability landscape
-ind_probs_fig = figure;
-cmap1 = brewermap(length(ind_plot_indices)+2,'Greys');
-hold on
-iter = 1;
-for e = ind_plot_indices
-  prob_vec = bursting_sim_struct(ind_sim_index).SS(:,e);  
-  area((n_bound_vec)/n_bcd_sites, prob_vec,'FaceColor',cmap1(iter+1,:),'FaceAlpha',0.7)
-  iter = iter+1;
-end
-ylim([0 0.42])
-ylabel('state likelihood')
-xlabel('normalized transcription rate')
-box on
-set(gca,'Fontsize',14)
-
-ax = gca;
-ax.YColor = 'black';
-ax.XColor = 'black';
-ax.Color = [228,221,209]/255;
-ind_probs_fig.InvertHardcopy = 'off';
-% grid on
-saveas(ind_probs_fig,[FigurePath 'no-coop_probs.png'])
-saveas(ind_probs_fig,[FigurePath 'no-coop_probs.pdf'])
-
+ind_plot_indices = 1:3;
 
 % plot results of stochastic simulations
-% plot parameters
 trace_index = 2;
 
 state_fig = figure;
 hold on
-for p = 2
-    stairs(bursting_sim_struct(ind_sim_index).sim_time_cell{ind_plot_indices(p),trace_index}/60,...
-    (bursting_sim_struct(ind_sim_index).sim_state_cell{ind_plot_indices(p),trace_index}-1)/n_bcd_sites,...
-    'Color',cmap1(p+1,:),'LineWidth',0.5);
-%   patchline(bursting_sim_struct(ind_sim_index).sim_time_cell{p,plot_index}/60,...
-%     (bursting_sim_struct(ind_sim_index).sim_state_cell{p,plot_index}-1)/n_bcd_sites,...
-%     'EdgeColor',cmap1(p,:),'LineWidth',1,'edgealpha',.5);
+% generate resampled trace (moving average, essentially)
+for i = 2%[2 1 3]%ind_plot_indices
+  time_raw = double(bursting_sim_struct(ind_sim_index).sim_time_cell{i,trace_index});
+  trace_raw = double(bursting_sim_struct(ind_sim_index).sim_emission_cell{i,trace_index});
+  [trace_rs, time_rs] = resample(trace_raw,time_raw,resamp_freq,'pchip');
+
+  plot(time_rs/60, trace_rs,'Color',green,'LineWidth',1.5);
 end
-ylim(ylTrace)
+ylim(ylimTrace)
 xlim([0 t_max])
-ylabel('normalized transcription rate')
+ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
-set(gca,'Fontsize',14,'YTick',0:0.2:1)
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
@@ -95,60 +75,85 @@ state_fig.InvertHardcopy = 'off';
 saveas(state_fig,[FigurePath 'no-coop_trace.png'])
 saveas(state_fig,[FigurePath 'no-coop_trace.pdf'])
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% (b) cooperative binding 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% close all
 
-% specify appropriate index
-coop_sim_index = 2;
-coop_plot_index = 4;
-% plot probability landscape
-coop_probs_fig = figure;
+hist_bins = linspace(0,1,35);
+
+hist_fig = figure('Position',[100 100 256 512]);
+
 hold on
-iter = 1;
-% first plot ind for reference
-prob_vec = bursting_sim_struct(ind_sim_index).SS(:,ind_plot_indices(2));  
-area((n_bound_vec)/n_bcd_sites, prob_vec,'FaceColor',cmap1(2+1,:),'FaceAlpha',0.5)
+% generate resampled trace (moving average, essentially)
+for i = 2%ind_plot_indices
+  time_raw = double(bursting_sim_struct(ind_sim_index).sim_time_cell{i,trace_index});
+  trace_raw = double(bursting_sim_struct(ind_sim_index).sim_emission_cell{i,trace_index});
+  
+  dur_vec = diff([time_raw t_max*60]);
+  state_vec = trace_raw'+1;
+  states_u = unique(state_vec);
+  stateSums = accumarray(state_vec,dur_vec');
+  stateSums = stateSums(stateSums~=0);
+  stateSums = stateSums/sum(stateSums);
+  stateShares = zeros(size(n_bound_vec));
+  stateShares(ismember(n_bound_vec,states_u-1)) = stateSums;
 
-% now with cooperativity
-prob_vec = bursting_sim_struct(coop_sim_index).SS(:,coop_plot_index);  
-area((n_bound_vec)/n_bcd_sites, prob_vec,'FaceColor',blue,'FaceAlpha',0.7,'EdgeAlpha',1)
-iter = iter + 1;
+  barh(n_bound_vec,stateShares,1,'FaceColor',green,'FaceAlpha',0.8);
+    
+end
 
-
-ylabel('state likelihood')
-xlabel('normalized transcription rate')
+xlabel('share')
 box on
-set(gca,'Fontsize',14)
 
+p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
 ax.XColor = 'black';
-ax.Color = [228,221,209]/255;
-coop_probs_fig.InvertHardcopy = 'off';
+xlim([0 0.5])
+set(gca,'Fontsize',14,'xtick',0:.25:.5)
+ylim([n_bound_vec(1)-0.5 n_bound_vec(end)+0.5])
+StandardFigurePBoC(p,gca);
+hist_fig.InvertHardcopy = 'off';
+saveas(hist_fig,[FigurePath 'no-coop_hist.png'])
+saveas(hist_fig,[FigurePath 'no-coop_hist.pdf'])
 
-saveas(coop_probs_fig,[FigurePath 'coop_probs.png'])
-saveas(coop_probs_fig,[FigurePath 'coop_probs.pdf'])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% (b) cooperative binding 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% specify appropriate index
+coop_sim_index = find(contains(sim_name_cell,'koff-mediated'));
+
+%  extract n bound vec
+coop_plot_index = size(bursting_sim_struct(2).SS,2)-1;
+
+%% get average on and off rates
+n_states = 7;
+SS =bursting_sim_struct(coop_sim_index).SS(:,end-1);
+Q = bursting_sim_struct(coop_sim_index).Q(:,:,end-1)';
+a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
+off_mean = SS'*vertcat(0,Q(m3&~m4))
+on_rates_raw = SS'*vertcat(Q(m1&~m2),0)
 
 
+%%
 % plot results of stochastic simulations
-% plot parameters
-trace_index = 2;
+
+trace_index = 34;
 
 state_fig = figure;
+cmap2 = brewermap(9,'Set2');
 hold on
+% generate resampled trace (moving average, essentially)
+time_raw = double(bursting_sim_struct(coop_sim_index).sim_time_cell{coop_plot_index,trace_index});
+trace_raw = double(bursting_sim_struct(coop_sim_index).sim_emission_cell{coop_plot_index,trace_index});
 
-stairs(bursting_sim_struct(coop_sim_index).sim_time_cell{coop_plot_index,trace_index}/60,...
-  (bursting_sim_struct(coop_sim_index).sim_state_cell{coop_plot_index,trace_index}-1)/n_bcd_sites,...
-  'Color',blue,'LineWidth',1);
+stairs(time_raw/60, trace_raw,'Color',blue,'LineWidth',1.5);
 
-ylim(ylTrace)
+ylim(ylimTrace)
 xlim([0 t_max])
-ylabel('normalized transcription rate')
+ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
-set(gca,'Fontsize',14,'YTick',0:0.2:1)
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
@@ -158,65 +163,86 @@ state_fig.InvertHardcopy = 'off';
 saveas(state_fig,[FigurePath 'coop_trace.png'])
 saveas(state_fig,[FigurePath 'coop_trace.pdf'])
 
+% calculate fraction of time in eac state
+dur_vec = diff([time_raw t_max*60]);
+stateSums = accumarray(trace_raw'+1,dur_vec');
+stateShares = stateSums/sum(stateSums);
+
+hist_fig = figure('Position',[100 100 256 512]);
+hold on
+barh(n_bound_vec,stateShares,1,'FaceColor',blue);
+  
+xlabel('share')
+box on
+p = plot(0,0);
+ax = gca;
+ax.YColor = 'black';
+xlim([0 0.5])
+ax.XColor = 'black';
+set(gca,'Fontsize',14,'xtick',0:.25:.5)
+ylim([n_bound_vec(1)-0.5 n_bound_vec(end)+0.5])
+StandardFigurePBoC(p,gca);
+
+hist_fig.InvertHardcopy = 'off';
+saveas(hist_fig,[FigurePath 'coop_hist.png'])
+saveas(hist_fig,[FigurePath 'coop_hist.pdf'])
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (c) rate-limiting step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% close all
-
+%%
 % specify appropriate index
-bottleneck_sim_index = 4;
+rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
 
-% plot probability landscape
-bottleneck_probs_fig = figure;
-hold on
-
-% first plot ind for reference
-prob_vec = bursting_sim_struct(ind_sim_index).SS(:,ind_plot_indices(1));  
-area((n_bound_vec)/n_bcd_sites, prob_vec,'FaceColor',cmap1(2,:),'FaceAlpha',0.7)
-prob_vec = bursting_sim_struct(ind_sim_index).SS(:,ind_plot_indices(3));  
-area((n_bound_vec)/n_bcd_sites, prob_vec,'FaceColor',cmap1(end-1,:),'FaceAlpha',0.7)
-
-% now with rate-limiting step
-prob_vec = bursting_sim_struct(bottleneck_sim_index).SS(:,coop_plot_index);  
-prob_vec = prob_vec(1:length(n_bound_vec)) + prob_vec(length(n_bound_vec)+1:end);
-area((n_bound_vec)/n_bcd_sites, prob_vec,'FaceColor',red,'FaceAlpha',1,'EdgeAlpha',1)
-
-ylabel('state likelihood')
-xlabel('normalized transcription rate')
-box on
-set(gca,'Fontsize',14)
-ylim([0 0.42])
-ax = gca;
-ax.YColor = 'black';
-ax.XColor = 'black';
-ax.Color = [228,221,209]/255;
-bottleneck_probs_fig.InvertHardcopy = 'off';
-saveas(bottleneck_probs_fig,[FigurePath 'bottleneck_probs.png'])
-saveas(bottleneck_probs_fig,[FigurePath 'bottleneck_probs.pdf'])
-
+%  extract n bound vec
+rateLim_plot_index = size(bursting_sim_struct(2).SS,2);
 
 % plot results of stochastic simulations
-% plot parameters
-trace_index = 8;
+trace_index = 5;
+
 state_fig = figure;
+hold on
 
-% calculate effective state vec
-state_vec = mod(bursting_sim_struct(bottleneck_sim_index).sim_state_cell{coop_plot_index,trace_index}-1,n_bound_vec(end)+1);
+% generate resampled trace (moving average, essentially)
+time_raw = double(bursting_sim_struct(rateLim_sim_index).sim_time_cell{rateLim_plot_index,trace_index});
+trace_raw = double(bursting_sim_struct(rateLim_sim_index).sim_emission_cell{rateLim_plot_index,trace_index});
 
-stairs(bursting_sim_struct(bottleneck_sim_index).sim_time_cell{coop_plot_index,trace_index}/60,...
-  state_vec/n_bcd_sites,  'Color',red,'LineWidth',0.5);
+stairs(time_raw/60, trace_raw,'Color',red,'LineWidth',1.5);
 
-ylim(ylTrace)
+ylim(ylimTrace)
 xlim([0 t_max])
-ylabel('normalized transcription rate')
+ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
-set(gca,'Fontsize',14,'YTick',0:0.2:1)
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
+p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
 ax.XColor = 'black';
-ax.Color = [228,221,209]/255;
+StandardFigurePBoC(p,gca);
 state_fig.InvertHardcopy = 'off';
-saveas(state_fig,[FigurePath 'coop_trace.png'])
-saveas(state_fig,[FigurePath 'coop_trace.pdf'])
+saveas(state_fig,[FigurePath 'rateLim_trace.png'])
+saveas(state_fig,[FigurePath 'rateLim_trace.pdf'])
+
+% calculate fraction of time in eac state
+dur_vec = diff([time_raw t_max*60]);
+stateSums = accumarray(trace_raw'+1,dur_vec');
+stateShares = stateSums/sum(stateSums);
+
+hist_fig = figure('Position',[100 100 256 512]);
+hold on
+barh(n_bound_vec,stateShares,1,'FaceColor',red);
+  
+xlabel('share')
+box on
+p = plot(0,0);
+ax = gca;
+ax.YColor = 'black';
+ax.XColor = 'black';
+xlim([0 0.5])
+ylim([n_bound_vec(1)-0.5 n_bound_vec(end)+0.5])
+StandardFigurePBoC(p,gca);
+set(gca,'Fontsize',14,'xtick',0:.25:.5)
+hist_fig.InvertHardcopy = 'off';
+saveas(hist_fig,[FigurePath 'rateLim_hist.png'])
+saveas(hist_fig,[FigurePath 'rateLim_hist.pdf'])
