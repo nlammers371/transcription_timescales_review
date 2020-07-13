@@ -36,9 +36,10 @@ for p = 1:length(simIndicesIndependent)
   % record network characteristics
   bursting_sim_struct(1).Q(:,:,p) = bursting_chain_calc_struct(1).Q(:,:,simIndicesIndependent(p));
   bursting_sim_struct(1).SS(:,p) = bursting_chain_calc_struct(1).SS(:,simIndicesIndependent(p));   
+  bursting_sim_struct(1).SSFull(:,p) = bursting_sim_struct(1).SS(:,p);
   % call sim function
   
-  [bursting_sim_struct(1).sim_state_cell(p,:), bursting_sim_struct(1).sim_emission_cell(p,:),bursting_sim_struct(1).sim_time_cell(p,:)] = ...
+  [~, bursting_sim_struct(1).sim_emission_cell(p,:),bursting_sim_struct(1).sim_time_cell(p,:)] = ...
         stochastic_sim_fun(bursting_sim_struct(1).Q(:,:,p), bursting_sim_struct(1).SS(:,p),bursting_sim_struct(1).E,n_sim,t_sim);  
 end
 toc
@@ -58,9 +59,10 @@ for i = [2 3]
     % record network characteristics
     bursting_sim_struct(i).Q(:,:,p) = bursting_chain_calc_struct(i).Q(:,:,simIndicesCoop(p));
     bursting_sim_struct(i).SS(:,p) = bursting_chain_calc_struct(i).SS(:,simIndicesCoop(p));   
+    bursting_sim_struct(i).SSFull(:,p) = bursting_sim_struct(i).SS(:,p);
     % call sim function
    
-    [bursting_sim_struct(i).sim_state_cell(p,:), bursting_sim_struct(i).sim_emission_cell(p,:),bursting_sim_struct(i).sim_time_cell(p,:)] = ...
+    [~, bursting_sim_struct(i).sim_emission_cell(p,:),bursting_sim_struct(i).sim_time_cell(p,:)] = ...
           stochastic_sim_fun(bursting_sim_struct(i).Q(:,:,p), bursting_sim_struct(i).SS(:,p),bursting_sim_struct(i).E,n_sim,t_sim);
    
   end

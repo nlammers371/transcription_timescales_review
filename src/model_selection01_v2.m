@@ -23,12 +23,15 @@ load([DataPath 'bursting_chain_calc_struct.mat'])
 emergent_indices = 2:3;
 rate_lim_indices = 4:length(bursting_sim_struct);
 sim_indices = [emergent_indices rate_lim_indices];
-dT = 1; % time res for interpolated data
+
+dT = 1; % time res for interpolated data in seconds
+
 time_vector = 0:dT:60*60;
 n_bound_vec = 0:6;
 n_bs = 6;
-sim_index = 8;
-%% (1) fit 2 state HMM to simulated data
+sim_index = size(bursting_sim_struct(2).SS,2);
+
+% (1) fit 2 state HMM to simulated data
 n_sim = size(bursting_sim_struct(1).sim_time_cell,2);
 
 % we first need to interpolate the simulation results
@@ -37,13 +40,13 @@ trace_array = NaN(n_sim, length(time_vector),length([emergent_indices rate_lim_i
 for i = 1:size(trace_array,3)
   for n = 1:n_sim
     % emergent traces first 
-    trace = bursting_sim_struct(sim_indices(i)).sim_emission_cell{sim_index,n}*n_bs + 1;
+    trace = single(bursting_sim_struct(sim_indices(i)).sim_emission_cell{sim_index,n} + 1);
     time = bursting_sim_struct(sim_indices(i)).sim_time_cell{sim_index,n};
     trace_array(n,:,i) = interp1(time,trace,time_vector,'previous','extrap');
   end
 end
 
-%% now plug traces into HMM
+% now plug traces into HMM
 
 % initial guess for transition prob matrix
 A_guess = ones(2);
@@ -62,6 +65,7 @@ E_array = NaN(2,n_bs+1,size(trace_array,3));
 
 % estimate HMM for the two models 
 disp('estimating HMM models...')
+rng(346);
 for i = 1:size(trace_array,3)
   tic
   [A_array(:,:,i),E_array(:,:,i)] = hmmtrain(trace_array(:,:,i),A_guess,E_guess);
@@ -75,7 +79,7 @@ disp('performing Viterbi fits...')
 for i = 1:size(trace_array,3)
   tic
   for n = 1:n_sim
-    viterbi_traces(n,:,i) = hmmviterbi(trace_array(n,:,i),A_array(:,:,i),E_array(:,:,i));
+    viterbi_traces(n,:,i) = hmmviterbi(trace_array(n,:,i),A_array(:,:,i),E_array(:,:,i))-1;
   end
   toc
 end
@@ -100,37 +104,20 @@ for i = 1:length(sim_indices)
   end
   wt_off_cell{i} = wt_off_vec;
 end
-%%
-e_vec = [0 0 1];
-Q = ones(3);
-Q(eye(3)==1) = 0;
-Q(3,1) = 0;
-Q(1,2) = 0;
-Q(2,1) = 1;
-Q(2,3) = 0;
-Q(eye(3)==1) = -sum(Q);
-state_options = 1:3;
-state_vec = [1];
-time_vec = [0];
-T = 1e5;
-tc = 0;
-while tc < T
-  state_curr = state_vec(end);
-  dt = exprnd(-1/Q(state_curr,state_curr));
-  tc = tc + dt;
-  
-  w_vec = Q(:,state_curr);
-  w_vec(state_curr) = 0;
-  next_state = randsample(state_options,1,true,w_vec);
-  
-  if tc < T
-    state_vec(end+1) = next_state;
-    time_vec(end+1) = tc;
-  end
+
+% store results in a data structure
+waiting_time_struct = struct;
+waiting_time_struct.A_array = A_array;
+waiting_time_struct.E_array = E_array;
+waiting_time_struct.trace_array = trace_array;
+waiting_time_struct.time_vector = time_vector;
+waiting_time_struct.viterbi_traces = viterbi_traces;
+waiting_time_struct.off_waiting_times = wt_off_cell;
+name_cell = cell(1,size(trace_array,3));
+for i = 1:size(trace_array,3)
+  name_cell{i} = bursting_sim_struct(sim_indices(i)).name;
 end
-%%
-e_vec = interp1(time_vec,1*(state_vec == 3),linspace(0,max(time_vec),10*T),'prev');
-e_diff = [0 diff(e_vec)];
-d_points = find(e_diff);
-dt_vec = diff(d_points)*dT;
-id_vec = diff(e_diff(d_points));
+waiting_time_struct.name_cell = name_cell;
+
+% save
+save([DataPath 'waiting_time_struct.mat'],'waiting_time_struct')

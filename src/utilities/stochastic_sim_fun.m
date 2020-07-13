@@ -33,5 +33,5 @@ function [sim_state_cell, sim_emission_cell, sim_time_cell] = stochastic_sim_fun
       end
       sim_state_cell{n} = int8(state_val_vec);    
       sim_emission_cell{n} = int8(emission_vec(state_val_vec));    
-      sim_time_cell{n} = single(jump_time_vec);
+      sim_time_cell{n} = double(jump_time_vec);
   end  
