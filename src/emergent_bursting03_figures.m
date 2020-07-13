@@ -119,13 +119,13 @@ saveas(hist_fig,[FigurePath 'no-coop_hist.pdf'])
 % (b) cooperative binding 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% specify appropriate index
+% specify appropriate index
 coop_sim_index = find(contains(sim_name_cell,'koff-mediated'));
 
 %  extract n bound vec
 coop_plot_index = size(bursting_sim_struct(2).SS,2)-1;
 
-%% get average on and off rates
+% get average on and off rates
 n_states = 7;
 SS =bursting_sim_struct(coop_sim_index).SS(:,end-1);
 Q = bursting_sim_struct(coop_sim_index).Q(:,:,end-1)';
@@ -133,8 +133,7 @@ a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(
 off_mean = SS'*vertcat(0,Q(m3&~m4))
 on_rates_raw = SS'*vertcat(Q(m1&~m2),0)
 
-
-%%
+%
 % plot results of stochastic simulations
 
 trace_index = 34;
@@ -190,7 +189,7 @@ saveas(hist_fig,[FigurePath 'coop_hist.pdf'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (c) rate-limiting step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
+%
 % specify appropriate index
 rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
 
