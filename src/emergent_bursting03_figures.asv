@@ -20,7 +20,7 @@ load([DataPath 'bursting_chain_calc_struct.mat'])
 
 % set basic plot parameters
 t_max = 60;
-ylimTrace = [-0.01 1.01];
+ylimTrace = [-0.5 6.5];
 n_bound_vec = 0:n_bcd_sites;
 
 % sim name cell
@@ -55,7 +55,7 @@ hold on
 % generate resampled trace (moving average, essentially)
 for i = 2%[2 1 3]%ind_plot_indices
   time_raw = double(bursting_sim_struct(ind_sim_index).sim_time_cell{i,trace_index});
-  trace_raw = double(bursting_sim_struct(ind_sim_index).sim_emission_cell{i,trace_index})/n_bcd_sites;
+  trace_raw = double(bursting_sim_struct(ind_sim_index).sim_emission_cell{i,trace_index});
   [trace_rs, time_rs] = resample(trace_raw,time_raw,resamp_freq,'pchip');
 
   plot(time_rs/60, trace_rs,'Color',green,'LineWidth',1);
@@ -65,7 +65,7 @@ xlim([0 t_max])
 ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
-set(gca,'Fontsize',14,'YTick',0:0.2:1)
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
@@ -84,10 +84,10 @@ hold on
 % generate resampled trace (moving average, essentially)
 for i = 2%ind_plot_indices
   time_raw = double(bursting_sim_struct(ind_sim_index).sim_time_cell{i,trace_index});
-  trace_raw = double(bursting_sim_struct(ind_sim_index).sim_emission_cell{i,trace_index})/n_bcd_sites;
+  trace_raw = double(bursting_sim_struct(ind_sim_index).sim_emission_cell{i,trace_index});
   
   dur_vec = diff([time_raw t_max*60]);
-  state_vec = trace_raw'*n_bcd_sites+1;
+  state_vec = trace_raw'+1;
   states_u = unique(state_vec);
   stateSums = accumarray(state_vec,dur_vec');
   stateSums = stateSums(stateSums~=0);
@@ -120,20 +120,20 @@ saveas(hist_fig,[FigurePath 'no-coop_hist.pdf'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify appropriate index
-coop_sim_index = find(contains(sim_name_cell,'kon-mediated'));
+coop_sim_index = find(contains(sim_name_cell,'koff-mediated'));
 
 %  extract n bound vec
 coop_plot_index = size(bursting_sim_struct(2).SS,2);
 
-% plot results of stochastic simulations
-trace_index = 5;
+%% plot results of stochastic simulations
+trace_index = 3;
 
 state_fig = figure;
 cmap2 = brewermap(9,'Set2');
 hold on
 % generate resampled trace (moving average, essentially)
 time_raw = double(bursting_sim_struct(coop_sim_index).sim_time_cell{coop_plot_index,trace_index});
-trace_raw = double(bursting_sim_struct(coop_sim_index).sim_emission_cell{coop_plot_index,trace_index})/n_bcd_sites;
+trace_raw = double(bursting_sim_struct(coop_sim_index).sim_emission_cell{coop_plot_index,trace_index});
 
 stairs(time_raw/60, trace_raw,'Color',red,'LineWidth',1);
 
@@ -142,19 +142,20 @@ xlim([0 t_max])
 ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
-set(gca,'Fontsize',14,'YTick',0:0.2:1)
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
 ax.XColor = 'black';
 StandardFigurePBoC(p,gca);
 state_fig.InvertHardcopy = 'off';
+%%
 saveas(state_fig,[FigurePath 'coop_trace.png'])
 saveas(state_fig,[FigurePath 'coop_trace.pdf'])
 
 % calculate fraction of time in eac state
 dur_vec = diff([time_raw t_max*60]);
-stateSums = accumarray(trace_raw'*n_bcd_sites+1,dur_vec');
+stateSums = accumarray(trace_raw'+1,dur_vec');
 stateShares = stateSums/sum(stateSums);
 
 hist_fig = figure('Position',[100 100 256 512]);
@@ -196,7 +197,7 @@ hold on
 
 % generate resampled trace (moving average, essentially)
 time_raw = double(bursting_sim_struct(rateLim_sim_index).sim_time_cell{rateLim_plot_index,trace_index});
-trace_raw = double(bursting_sim_struct(rateLim_sim_index).sim_emission_cell{rateLim_plot_index,trace_index})/n_bcd_sites;
+trace_raw = double(bursting_sim_struct(rateLim_sim_index).sim_emission_cell{rateLim_plot_index,trace_index});
 
 stairs(time_raw/60, trace_raw,'Color',blue,'LineWidth',1);
 
@@ -205,7 +206,7 @@ xlim([0 t_max])
 ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
-set(gca,'Fontsize',14,'YTick',0:0.2:1)
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
@@ -217,7 +218,7 @@ saveas(state_fig,[FigurePath 'rateLim_trace.pdf'])
 
 % calculate fraction of time in eac state
 dur_vec = diff([time_raw t_max*60]);
-stateSums = accumarray(trace_raw'*n_bcd_sites+1,dur_vec');
+stateSums = accumarray(trace_raw'+1,dur_vec');
 stateShares = stateSums/sum(stateSums);
 
 hist_fig = figure('Position',[100 100 256 512]);

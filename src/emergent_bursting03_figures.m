@@ -58,7 +58,7 @@ for i = 2%[2 1 3]%ind_plot_indices
   trace_raw = double(bursting_sim_struct(ind_sim_index).sim_emission_cell{i,trace_index});
   [trace_rs, time_rs] = resample(trace_raw,time_raw,resamp_freq,'pchip');
 
-  plot(time_rs/60, trace_rs,'Color',green,'LineWidth',1);
+  plot(time_rs/60, trace_rs,'Color',green,'LineWidth',1.5);
 end
 ylim(ylimTrace)
 xlim([0 t_max])
@@ -119,14 +119,25 @@ saveas(hist_fig,[FigurePath 'no-coop_hist.pdf'])
 % (b) cooperative binding 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% specify appropriate index
-coop_sim_index = find(contains(sim_name_cell,'kon-mediated'));
+%% specify appropriate index
+coop_sim_index = find(contains(sim_name_cell,'koff-mediated'));
 
 %  extract n bound vec
-coop_plot_index = size(bursting_sim_struct(2).SS,2);
+coop_plot_index = size(bursting_sim_struct(2).SS,2)-1;
 
+%% get average on and off rates
+n_states = 7;
+SS =bursting_sim_struct(coop_sim_index).SS(:,end-1);
+Q = bursting_sim_struct(coop_sim_index).Q(:,:,end-1)';
+a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
+off_mean = SS'*vertcat(0,Q(m3&~m4))
+on_rates_raw = SS'*vertcat(Q(m1&~m2),0)
+
+
+%%
 % plot results of stochastic simulations
-trace_index = 5;
+
+trace_index = 34;
 
 state_fig = figure;
 cmap2 = brewermap(9,'Set2');
@@ -135,7 +146,7 @@ hold on
 time_raw = double(bursting_sim_struct(coop_sim_index).sim_time_cell{coop_plot_index,trace_index});
 trace_raw = double(bursting_sim_struct(coop_sim_index).sim_emission_cell{coop_plot_index,trace_index});
 
-stairs(time_raw/60, trace_raw,'Color',red,'LineWidth',1);
+stairs(time_raw/60, trace_raw,'Color',blue,'LineWidth',1.5);
 
 ylim(ylimTrace)
 xlim([0 t_max])
@@ -159,7 +170,7 @@ stateShares = stateSums/sum(stateSums);
 
 hist_fig = figure('Position',[100 100 256 512]);
 hold on
-barh(n_bound_vec,stateShares,1,'FaceColor',red);
+barh(n_bound_vec,stateShares,1,'FaceColor',blue);
   
 xlabel('share')
 box on
@@ -176,17 +187,15 @@ hist_fig.InvertHardcopy = 'off';
 saveas(hist_fig,[FigurePath 'coop_hist.png'])
 saveas(hist_fig,[FigurePath 'coop_hist.pdf'])
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (c) rate-limiting step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%
 % specify appropriate index
 rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
 
 %  extract n bound vec
-rateLim_plot_index = coop_plot_index;
+rateLim_plot_index = size(bursting_sim_struct(2).SS,2);
 
 % plot results of stochastic simulations
 trace_index = 5;
@@ -198,7 +207,7 @@ hold on
 time_raw = double(bursting_sim_struct(rateLim_sim_index).sim_time_cell{rateLim_plot_index,trace_index});
 trace_raw = double(bursting_sim_struct(rateLim_sim_index).sim_emission_cell{rateLim_plot_index,trace_index});
 
-stairs(time_raw/60, trace_raw,'Color',blue,'LineWidth',1);
+stairs(time_raw/60, trace_raw,'Color',red,'LineWidth',1.5);
 
 ylim(ylimTrace)
 xlim([0 t_max])
@@ -222,7 +231,7 @@ stateShares = stateSums/sum(stateSums);
 
 hist_fig = figure('Position',[100 100 256 512]);
 hold on
-barh(n_bound_vec,stateShares,1,'FaceColor',blue);
+barh(n_bound_vec,stateShares,1,'FaceColor',red);
   
 xlabel('share')
 box on
