@@ -39,7 +39,7 @@ cmap1 = [green ; blue ;red];
 
 % specify appropriate index
 rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
-%%
+%
 %  extract n bound vec
 rateLim_sim_sub_index = 2;
 % plot results of stochastic simulations
