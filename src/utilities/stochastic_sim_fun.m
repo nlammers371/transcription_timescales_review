@@ -7,7 +7,7 @@ function [sim_state_cell, sim_emission_cell, sim_time_cell] = stochastic_sim_fun
   sim_state_cell = cell(1,n_sim);
   sim_emission_cell = cell(1,n_sim);
   sim_time_cell = cell(1,n_sim);
-  
+ 
   % iterate
   parfor n = 1:n_sim
       state_val_vec = [randsample(state_option_vec,1,true,ss_vec)];
@@ -15,7 +15,7 @@ function [sim_state_cell, sim_emission_cell, sim_time_cell] = stochastic_sim_fun
       t_curr = 0;
       while t_curr < t_sim            
           state_curr = state_val_vec(end);   % current state  
-          next_jump = exprnd(-1/Q(state_curr,state_curr)); % time til next jump              
+          next_jump = exprnd(-1/Q(state_curr,state_curr)); % time til next jump                        
           t_next = t_curr + next_jump;
 
           % randomly choose next state
@@ -32,6 +32,6 @@ function [sim_state_cell, sim_emission_cell, sim_time_cell] = stochastic_sim_fun
           t_curr = t_next;
       end
       sim_state_cell{n} = int8(state_val_vec);    
-      sim_emission_cell{n} = int8(emission_vec(state_val_vec));    
+      sim_emission_cell{n} = int8(emission_vec(state_val_vec));         
       sim_time_cell{n} = double(jump_time_vec);
   end  

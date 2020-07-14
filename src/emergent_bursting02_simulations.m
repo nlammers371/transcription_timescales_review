@@ -45,7 +45,7 @@ end
 toc
 
 % now cooperative chain
-simIndicesCoop = 180:6:201;
+simIndicesCoop = 176:4:201;
 
 % set seed for consistency
 rng(231)
@@ -68,7 +68,9 @@ for i = [2 3]
   end
 end
 toc
+
 % now iterate through compound chains for rate limiting step
+simIndicesRL = [simIndicesCoop(end-2) simIndicesCoop(end)];
 offset = length(bursting_sim_struct);
 rng(234)
 disp('Simulating rate-limiting step codition...')
@@ -77,11 +79,11 @@ for i = 1:length(bursting_step_calc_struct)
   % record key info
   bursting_sim_struct(i+offset).name = bursting_step_calc_struct(i).name;
   bursting_sim_struct(i+offset).E = bursting_step_calc_struct(i).E;
-  for p = 1:length(simIndicesCoop)
+  for p = 1:length(simIndicesRL)
     % record network characteristics
-    bursting_sim_struct(i+offset).Q(:,:,p) = bursting_step_calc_struct(i).Q(:,:,simIndicesCoop(p));
-    bursting_sim_struct(i+offset).SS(:,p) = bursting_step_calc_struct(i).SS(:,simIndicesCoop(p));   
-    bursting_sim_struct(i+offset).SSFull(:,p) = bursting_step_calc_struct(i).SSFull(:,simIndicesCoop(p));   
+    bursting_sim_struct(i+offset).Q(:,:,p) = bursting_step_calc_struct(i).Q(:,:,simIndicesRL(p));
+    bursting_sim_struct(i+offset).SS(:,p) = bursting_step_calc_struct(i).SS(:,simIndicesRL(p));   
+    bursting_sim_struct(i+offset).SSFull(:,p) = bursting_step_calc_struct(i).SSFull(:,simIndicesRL(p));   
     % call sim function
     [bursting_sim_struct(i+offset).sim_state_cell(p,:), bursting_sim_struct(i+offset).sim_emission_cell(p,:),bursting_sim_struct(i+offset).sim_time_cell(p,:)] = ...
           stochastic_sim_fun(bursting_sim_struct(i+offset).Q(:,:,p), bursting_sim_struct(i+offset).SSFull(:,p),bursting_sim_struct(i+offset).E,n_sim,t_sim);
