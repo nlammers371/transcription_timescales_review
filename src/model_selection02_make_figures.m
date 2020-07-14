@@ -36,14 +36,14 @@ cmap1 = [green ; blue ;red];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (1) Make figure illustrating passage time concept
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+%%
 % specify appropriate index
 rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
-%%
+
 %  extract n bound vec
-rateLim_sim_sub_index = 2;
+rateLim_sim_sub_index = 1;
 % plot results of stochastic simulations
-trace_index = 5;
+trace_index = 7;
 
 state_fig = figure('Position',[100 100 1024 512]);
 hold on
@@ -58,19 +58,19 @@ viterbi_time = waiting_time_struct(rateLim_sim_index).time_vector;
 viterbi_fit = waiting_time_struct(rateLim_sim_index).viterbi_traces(trace_index,:,rateLim_sim_sub_index)*n_bcd_sites;
 
 stairs(viterbi_time/60, trace_raw,'Color',red,'LineWidth',1);
-stairs(viterbi_time/60, viterbi_fit,'Color','k','LineWidth',1);
+stairs(viterbi_time/60, viterbi_fit,'Color','k','LineWidth',1.5);
 
 ylim(ylimTrace)
-xlim([0 t_max])
+xlim([0 30])
 ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
 set(gca,'Fontsize',14,'YTick',n_bound_vec)
 p = plot(0,0);
+StandardFigurePBoC(p,gca);
 ax = gca;
 ax.YColor = 'black';
 ax.XColor = 'black';
-StandardFigurePBoC(p,gca);
 state_fig.InvertHardcopy = 'off';
 saveas(state_fig,[FigurePath 'rateLim_trace.png'])
 saveas(state_fig,[FigurePath 'rateLim_trace.pdf'])
@@ -78,18 +78,52 @@ saveas(state_fig,[FigurePath 'rateLim_trace.pdf'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% (2) Make figures showing passage times for rate-limiting step mode
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-rateLim_sim_indices = find(contains(sim_name_cell,{'1rate-limiting','2rate-limiting','5rate-limiting','15rate-limiting'}));
-close all
-% raw histogram figure
-wt_bins = linspace(0,6,25);
+rateLim_sim_indices = find(ismember(sim_name_cell,{'1rate-limiting steps','2rate-limiting steps','5rate-limiting steps'}));
 
+wt_bins = linspace(0,6,35);
+wt_centers = (wt_bins(1:end-1)+wt_bins(2:end))/2;
+% define objective function to fit erlang distribution
+gamma_fun = @(a,b) (b^a .* wt_centers.^(a-1).*exp(-wt_centers*b)) / gamma(a);
+% perform fits
+options = optimoptions(@lsqnonlin,'MaxFunctionEvaluations',1e4);
+rl_fit_struct = struct;
+for i = 1:length(rateLim_sim_indices)
+  wait_times = waiting_time_struct(rateLim_sim_indices(i)).off_waiting_times{rateLim_sim_sub_index}/60;
+  wait_times = wait_times(wait_times>0.05);
+  p_vec = histcounts(wait_times,wt_bins);%,'Normalization','probability');  
+  gamma_objective = @(x) p_vec-x(3)*gamma_fun(x(1),x(2));
+  rl_fit_struct(i).params = lsqnonlin(gamma_objective,[1 1 1],[0 0 0],[20 20 Inf],options);
+  pd_curve = gamma_fun(rl_fit_struct(i).params(1),rl_fit_struct(i).params(2));
+  rl_fit_struct(i).pd_curve = pd_curve/sum(pd_curve);
+end
+
+% raw histogram figure
+%%
+close all
 rl_hist_fig = figure;
 cmap = brewermap(2+length(rateLim_sim_indices),'Set2');
 hold on
-iter = length(rateLim_sim_indices);
-for i = fliplr(rateLim_sim_indices)
-  histogram(waiting_time_struct(i).off_waiting_times{1}/60,wt_bins,'Normalization','probability','FaceColor',cmap(1+iter,:));
-  iter = iter - 1;
+for i = [1 3]
+  
+  % extract waiting times
+  wait_times = waiting_time_struct(rateLim_sim_indices(i)).off_waiting_times{rateLim_sim_sub_index}/60;
+  wait_times = wait_times(wait_times>0.05);
+  
+  % plot histogram
+  histogram(wait_times,wt_bins,...
+    'Normalization','probability','FaceColor',cmap(1+i,:),'EdgeAlpha',.5,'FaceAlpha',0.2);
+  
+  plot(wt_centers,rl_fit_struct(i).pd_curve,'Color',cmap(1+i,:),'LineWidth',2)
 end
 
+xlim([0 wt_bins(end)])
+ylabel('passage time (minutes)')
+xlabel('share')
+% call PBoC formatting function
+p = plot(0,0);
+StandardFigurePBoC(p,gca);
+ax = gca;
+ax.YColor = 'black';
+ax.XColor = 'black';
+rl_hist_fig.InvertHardcopy = 'off';
 
