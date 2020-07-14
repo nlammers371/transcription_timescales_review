@@ -19,7 +19,7 @@ load([ReadPath 'bursting_step_calc_struct.mat'])
 load([ReadPath 'bursting_chain_calc_struct.mat'])
 
 % simulation parameters
-n_sim = 100; % number of indivudal traces to simulate
+n_sim = 150; % number of indivudal traces to simulate
 t_sim = 10*60*60; % duration of each simulation (in seconds)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,7 +27,7 @@ t_sim = 10*60*60; % duration of each simulation (in seconds)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 p = gcp('nocreate');
 if isempty(p)
-  parpool(12);
+  parpool(24);
 end
 %%%%%%%%%%%%%%%%%%%%%%%
 % cooperative binding
@@ -77,7 +77,7 @@ emergent_indices = 1:2;
 rate_lim_indices = 3:length(bursting_sim_struct);
 sim_indices = [emergent_indices rate_lim_indices];
 
-dT = 0.1; % time res for interpolated data in seconds
+dT = 5; % time res for interpolated data in seconds (effectively our experimental time res)
 
 time_vector = 0:dT:60*60;
 n_bound_vec = 0:6;
@@ -91,7 +91,14 @@ for s = sim_indices
 
   % (1) fit 2 state HMM to simulated data
   n_sim = size(bursting_sim_struct(1).sim_time_cell,2); % number of independent simulations
-
+  
+  
+  %%% two approaches to extracting waiting times:
+  %   (1) HMM: use 2 state HMM to extract state fluctuations. This in
+  %       effect mimics what we'd have to do with real data
+  
+  %   (2) Idealized: extract true times it takes to go from 0->6. 
+  
   % we first need to interpolate the simulation results
   trace_array = NaN(n_sim, length(time_vector),length(sub_index_vec));
 
@@ -145,23 +152,42 @@ for s = sim_indices
 
 
   % (2) Now extract waiting times for each
-  wt_off_cell = cell(1,length(sim_indices));
+  wt_off_cell_hmm = cell(1,length(sim_indices));
+  wt_off_cell_ideal = cell(1,length(sim_indices));
 
   for i = 1:length(sub_index_vec)
-    wt_off_vec = [];
-
+    wt_off_vec_hmm = [];
+    wt_off_vec_ideal = [];
     for n = 1:n_sim
-      % emergent
-      ev_trace = viterbi_traces(n,:,i);
-      ev_diff = [0 diff(ev_trace)];
-      d_points = find(ev_diff);
+      % extract wiating times using HMM method
+      v_trace = viterbi_traces(n,:,i);
+      v_diff = [0 diff(v_trace)];
+      d_points = find(v_diff);
       dt_vec = diff(d_points)*dT;
-      id_vec = diff(ev_diff(d_points));
+      id_vec = diff(v_diff(d_points));
 
-      wt_off_vec = [wt_off_vec dt_vec(id_vec>0)];   
-
+      wt_off_vec_hmm = [wt_off_vec_hmm dt_vec(id_vec>0)];   
+      
+      % extract idealized waiting times
+      raw_trace = bursting_sim_struct(s).sim_emission_cell{i,n};
+      raw_times = bursting_sim_struct(s).sim_time_cell{i,n};
+      % select for high and low periods
+      hl_indices = find(raw_trace==0|raw_trace==6);     
+      condensed_trace = raw_trace(hl_indices);
+      % find rise and fall events
+      diff_trace = diff([0 condensed_trace]);
+      drop_indices = find(diff_trace<0);
+      rise_indices = find(diff_trace>0);
+      rise_indices = rise_indices(rise_indices>drop_indices(1));
+      drop_indices = drop_indices(drop_indices<rise_indices(end));
+      % convert back to real time space
+      drop_times = raw_times(hl_indices(drop_indices));
+      rise_times = raw_times(hl_indices(rise_indices));
+      % record
+      wt_off_vec_ideal = [wt_off_vec_ideal rise_times-drop_times];
     end
-    wt_off_cell{i} = wt_off_vec;
+    wt_off_cell_hmm{i} = wt_off_vec_hmm;
+    wt_off_cell_ideal{i} = wt_off_vec_ideal;
   end
 
   % store results in a data structure  
@@ -170,7 +196,7 @@ for s = sim_indices
   waiting_time_struct(iter).trace_array = trace_array;
   waiting_time_struct(iter).time_vector = time_vector;
   waiting_time_struct(iter).viterbi_traces = viterbi_traces;
-  waiting_time_struct(iter).off_waiting_times = wt_off_cell;
+  waiting_time_struct(iter).off_waiting_times = wt_off_cell_hmm;
   waiting_time_struct(iter).name = bursting_sim_struct(s).name;
   iter = iter + 1;
 end
