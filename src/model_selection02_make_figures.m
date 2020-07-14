@@ -12,12 +12,11 @@ addpath('utilities')
 % set paths
 FigurePath = ['../fig/waiting_time_distributions/' project '/'];
 mkdir(FigurePath)
-DataPathWT = ['../out/waiting_time_distributions/' project '/'];
-DataPathSim = ['../out/emergent_bursting/' project '/'];
+DataPath = ['../out/waiting_time_distributions/' project '/'];
+% DataPathSim = ['../out/emergent_bursting/' project '/'];
 
 % load data
-load([DataPathWT 'waiting_time_struct.mat'])
-load([DataPathSim 'bursting_sim_struct.mat'])
+load([DataPath 'waiting_time_struct.mat'])
 
 % set basic plot parameters
 t_max = 60;

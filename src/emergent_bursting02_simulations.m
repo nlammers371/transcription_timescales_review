@@ -1,51 +1,82 @@
-% script to simulate burst time series with parameters from analytic
-% calculations
-function bursting_sim_struct = stochastic_simulations_wrapper(DataPath,simIndex,simSubIndices,n_sim,t_sim,r_seed)
-% clear
-% close all
+clear
+close all
 addpath('utilities')
 
 % load numeric results
-% project = 'n6';
+project = 'n6';
 addpath('utilities')
 
 % set paths
-% DataPath = ['../out/emergent_bursting/' project '/'];
+DataPath = ['../out/emergent_bursting/' project '/'];
 
-% load data
 load([DataPath 'bursting_chain_calc_struct.mat'])
 load([DataPath 'bursting_step_calc_struct.mat'])
 
 % set stochastic simulation parameters
-% n_sim = 100; % number of indivudal traces to simulate
-% t_sim = 60*60; % duration of each simulation (in seconds)
+n_sim = 25; % number of indivudal traces to simulate
+t_sim = 60*60; % duration of each simulation (in seconds)
 % n_calc_points = size(bursting_chain_calc_struct(1).Q,3);
 
+
+%%%%%%%%%%%%%%%%%%%%%%%
 % independent burst chain  first
+%%%%%%%%%%%%%%%%%%%%%%%
+ind_index = 1;
+ind_sub_index = 101;
+r_seed = 123;
+
 bursting_sim_struct = struct;
-
-% now cooperative chain
-% simSubIndices = 176:4:201;
-
 % set seed for consistency
-rng(r_seed)
-disp('Simulating cooperative binding condition...')
-tic
 
 % record key info
-bursting_sim_struct(simIndex).name = bursting_chain_calc_struct(simIndex).name;
-bursting_sim_struct(simIndex).E = bursting_chain_calc_struct(simIndex).E;
-for p = 1:length(simSubIndices)
-  % record network characteristics
-  bursting_sim_struct(simIndex).Q(:,:,p) = bursting_chain_calc_struct(simIndex).Q(:,:,simSubIndices(p));
-  bursting_sim_struct(simIndex).SS(:,p) = bursting_chain_calc_struct(simIndex).SS(:,simSubIndices(p));   
-  bursting_sim_struct(simIndex).SSFull(:,p) = bursting_sim_struct(simIndex).SS(:,p);
-  % call sim function
 
-  [bursting_sim_struct(simIndex).sim_emission_cell(p,:), bursting_sim_struct(simIndex).sim_emission_cell(p,:),bursting_sim_struct(simIndex).sim_time_cell(p,:)] = ...
-        stochastic_sim_fun(bursting_sim_struct(simIndex).Q(:,:,p), bursting_sim_struct(simIndex).SS(:,p),bursting_sim_struct(simIndex).E,n_sim,t_sim);
-
+disp('Simulating independent binding condition...')
+tic
+bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct,ind_index,ind_sub_index,n_sim,t_sim,r_seed);
+fnames = fieldnames(bursting_temp);
+for f = 1:length(fnames)
+  bursting_sim_struct(1).(fnames{f}) = bursting_temp.(fnames{f});
 end
 toc
 
-% save([DataPath, 'bursting_sim_struct.mat'],'bursting_sim_struct');
+%%%%%%%%%%%%%%%%%%%%%%%
+% cooperative binding
+%%%%%%%%%%%%%%%%%%%%%%%
+
+% now cooperative chain
+simIndicesCoop = 176:4:201;
+
+% set seed for consistency
+r_seed_coop_vec = [231 111];
+disp('Simulating cooperative binding condition...')
+tic
+iter = 1;
+for i = [2 3]
+  bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct,i,simIndicesCoop,n_sim,t_sim,r_seed_coop_vec(iter));
+  fnames = fieldnames(bursting_temp);
+  for f = 1:length(fnames)
+    bursting_sim_struct(i).(fnames{f}) = bursting_temp.(fnames{f});
+  end
+  iter = iter + 1;
+end
+toc
+
+% now iterate through compound chains for rate limiting step
+rng(122);
+r_seed_rl_vec = round(rand(1,length(bursting_step_calc_struct))*1000);
+simIndicesRL = [simIndicesCoop(end-2) simIndicesCoop(end)];
+offset = length(bursting_sim_struct);
+
+disp('Simulating rate-limiting step codition...')
+tic
+for i = 1:length(bursting_step_calc_struct)
+  bursting_temp = stochastic_simulation_wrapper(bursting_step_calc_struct,i,simIndicesRL,n_sim,t_sim,r_seed_rl_vec(i));
+  fnames = fieldnames(bursting_temp);
+  for f = 1:length(fnames)
+    bursting_sim_struct(i+offset).(fnames{f}) = bursting_temp.(fnames{f});
+  end
+  iter = iter + 1;
+end
+toc
+
+save([DataPath, 'bursting_sim_struct.mat'],'bursting_sim_struct');

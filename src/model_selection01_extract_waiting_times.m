@@ -15,16 +15,69 @@ WritePath = ['../out/waiting_time_distributions/' project '/'];
 mkdir(WritePath);
 
 % load data
-load([ReadPath 'bursting_sim_struct.mat'])
+load([ReadPath 'bursting_step_calc_struct.mat'])
 load([ReadPath 'bursting_chain_calc_struct.mat'])
 
-% set basic parameters
+% simulation parameters
+n_sim = 100; % number of indivudal traces to simulate
+t_sim = 10*60*60; % duration of each simulation (in seconds)
 
-emergent_indices = 2:3;
-rate_lim_indices = 4:length(bursting_sim_struct);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% run stochastic simulation script
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+p = gcp('nocreate');
+if isempty(p)
+  parpool(12);
+end
+%%%%%%%%%%%%%%%%%%%%%%%
+% cooperative binding
+%%%%%%%%%%%%%%%%%%%%%%%
+
+% now cooperative chain
+simIndicesCoop = 176:4:201;
+
+% set seed for consistency
+r_seed_vec = round(rand(1,2+length(bursting_step_calc_struct))*1000);
+
+disp('Simulating cooperative binding condition...')
+tic
+iter = 1;
+for i = [2 3]
+  bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct(i),simIndicesCoop,n_sim,t_sim,r_seed_vec(iter));
+  fnames = fieldnames(bursting_temp);
+  for f = 1:length(fnames)
+    bursting_sim_struct(iter).(fnames{f}) = bursting_temp.(fnames{f});
+  end
+  iter = iter + 1;
+end
+toc
+
+% now iterate through compound chains for rate limiting step
+rng(122);
+
+simIndicesRL = [simIndicesCoop(end-2) simIndicesCoop(end)];
+offset = length(bursting_sim_struct);
+
+disp('Simulating rate-limiting step codition...')
+tic
+for i = 1:length(bursting_step_calc_struct)
+  bursting_temp = stochastic_simulation_wrapper(bursting_step_calc_struct(i),simIndicesRL,n_sim,t_sim,r_seed_vec(i));
+  fnames = fieldnames(bursting_temp);
+  for f = 1:length(fnames)
+    bursting_sim_struct(i+offset).(fnames{f}) = bursting_temp.(fnames{f});
+  end
+  iter = iter + 1;
+end
+toc
+
+%%
+% set basic parameters
+n_bootstraps = 25;
+emergent_indices = 1:2;
+rate_lim_indices = 3:length(bursting_sim_struct);
 sim_indices = [emergent_indices rate_lim_indices];
 
-dT = 1; % time res for interpolated data in seconds
+dT = 0.1; % time res for interpolated data in seconds
 
 time_vector = 0:dT:60*60;
 n_bound_vec = 0:6;
@@ -72,8 +125,9 @@ for s = sim_indices
   disp(['estimating HMM models (' num2str(iter) '/' num2str(length(sim_indices)) ')...'])
   rng(346);
   tic
+  boot_indices = randsample(1:n_sim,n_bootstraps,true); % use subset for speed
   parfor i = 1:size(trace_array,3)    
-    [A_array(:,:,i),E_array(:,:,i)] = hmmtrain(trace_array(:,:,i),A_guess,E_guess);    
+    [A_array(:,:,i),E_array(:,:,i)] = hmmtrain(trace_array(boot_indices,:,i),A_guess,E_guess);    
   end
   toc
 
