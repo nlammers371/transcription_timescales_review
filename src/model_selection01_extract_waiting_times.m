@@ -31,8 +31,8 @@ n_bound_vec = 0:6;
 n_bs = 6;
 
 waiting_time_struct = struct;
-
-for s = 1:length(sim_indices)
+iter = 1;
+for s = sim_indices
   
   sub_index_vec = 1:size(bursting_sim_struct(s).SS,2);
 
@@ -69,25 +69,25 @@ for s = 1:length(sim_indices)
   E_array = NaN(2,n_bs+1,size(trace_array,3));
 
   % estimate HMM for the two models 
-  disp('estimating HMM models...')
+  disp(['estimating HMM models (' num2str(iter) '/' num2str(length(sim_indices)) ')...'])
   rng(346);
-  for i = 1:size(trace_array,3)
-    tic
-    [A_array(:,:,i),E_array(:,:,i)] = hmmtrain(trace_array(:,:,i),A_guess,E_guess);
-    toc
+  tic
+  parfor i = 1:size(trace_array,3)    
+    [A_array(:,:,i),E_array(:,:,i)] = hmmtrain(trace_array(:,:,i),A_guess,E_guess);    
   end
+  toc
 
   % estimate viterbi paths
   viterbi_traces = NaN(size(trace_array));
 
-  disp('performing Viterbi fits...')
-  for i = 1:size(trace_array,3)
-    tic
+%   disp('performing Viterbi fits...')
+%   tic
+  for i = 1:size(trace_array,3)    
     for n = 1:n_sim
       viterbi_traces(n,:,i) = hmmviterbi(trace_array(n,:,i),A_array(:,:,i),E_array(:,:,i))-1;
     end
-    toc
   end
+%   toc
 
 
   % (2) Now extract waiting times for each
@@ -111,13 +111,14 @@ for s = 1:length(sim_indices)
   end
 
   % store results in a data structure  
-  waiting_time_struct(s).A_array = A_array;
-  waiting_time_struct(s).E_array = E_array;
-  waiting_time_struct(s).trace_array = trace_array;
-  waiting_time_struct(s).time_vector = time_vector;
-  waiting_time_struct(s).viterbi_traces = viterbi_traces;
-  waiting_time_struct(s).off_waiting_times = wt_off_cell;
-  waiting_time_struct(s).name = bursting_sim_struct(s).name;
+  waiting_time_struct(iter).A_array = A_array;
+  waiting_time_struct(iter).E_array = E_array;
+  waiting_time_struct(iter).trace_array = trace_array;
+  waiting_time_struct(iter).time_vector = time_vector;
+  waiting_time_struct(iter).viterbi_traces = viterbi_traces;
+  waiting_time_struct(iter).off_waiting_times = wt_off_cell;
+  waiting_time_struct(iter).name = bursting_sim_struct(s).name;
+  iter = iter + 1;
 end
 
 % save

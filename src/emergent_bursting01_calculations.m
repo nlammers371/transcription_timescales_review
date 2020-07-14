@@ -16,7 +16,7 @@ n_med = 3; % midpoint
 n_bound_vec = 0:n_bs; % vector encoding # bound in each state
 off_rate_basal = 1/3; % in seconds. This sets overall system timescales (from Mir et al, 2018)
 n_calc_points = 201; % number of distinct binding and cooperative energy values to explore
-rate_lim_steps_vec = [1:5 10 15]; % number of rate-limiting steps 
+rate_lim_steps_vec = [1:2 5 10 15]; % number of rate-limiting steps 
 n_mol = 6.02214076e23;
 kb = 1.38064852e-23;
 T = 300;
@@ -267,7 +267,7 @@ for n =1:length(rate_lim_steps_vec)
   end
   
   % record
-  bursting_step_calc_struct(n).name = [num2str(n) 'rate-limiting steps'];
+  bursting_step_calc_struct(n).name = [num2str(rate_lim_steps_vec(n)) 'rate-limiting steps'];
   bursting_step_calc_struct(n).Q = Q_rate_lim_array; 
   bursting_step_calc_struct(n).SS = P_lim_array; 
   bursting_step_calc_struct(n).SSFull =P_lim_array_full;

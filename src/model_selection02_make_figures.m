@@ -25,7 +25,7 @@ ylimTrace = [-0.5 6.5];
 n_bound_vec = 0:n_bcd_sites;
 
 % sim name cell
-sim_name_cell = {bursting_sim_struct.name};
+sim_name_cell = {waiting_time_struct.name};
 
 % define colors
 blue = [190 201 224]/255;
@@ -35,29 +35,28 @@ gray = [0.7020    0.7020    0.7020];
 cmap1 = [green ; blue ;red];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% (1) Make figure illustrating passage time concept
+% (1) Make figure illustrating passage time concept
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify appropriate index
 rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
-
+%%
 %  extract n bound vec
-rateLim_plot_index = size(bursting_sim_struct(2).SS,2);
-
+rateLim_sim_sub_index = 2;
 % plot results of stochastic simulations
 trace_index = 5;
 
-state_fig = figure;
+state_fig = figure('Position',[100 100 1024 512]);
 hold on
 
 % extract trace data
 % time_raw = double(bursting_sim_struct(rateLim_sim_index).sim_time_cell{rateLim_plot_index,trace_index});
 % trace_raw = double(bursting_sim_struct(rateLim_sim_index).sim_emission_cell{rateLim_plot_index,trace_index});
-trace_raw = waiting_time_struct.trace_array(trace_index,:,rateLim_sim_index)-1;
+trace_raw = waiting_time_struct(rateLim_sim_index).trace_array(trace_index,:,rateLim_sim_sub_index)-1;
 
 % extract corresponding viterbi fit
-viterbi_time = waiting_time_struct.time_vector;
-viterbi_fit = waiting_time_struct.viterbi_traces(trace_index,:,rateLim_sim_index)*n_bcd_sites;
+viterbi_time = waiting_time_struct(rateLim_sim_index).time_vector;
+viterbi_fit = waiting_time_struct(rateLim_sim_index).viterbi_traces(trace_index,:,rateLim_sim_sub_index)*n_bcd_sites;
 
 stairs(viterbi_time/60, trace_raw,'Color',red,'LineWidth',1);
 stairs(viterbi_time/60, viterbi_fit,'Color','k','LineWidth',1);
@@ -74,9 +73,24 @@ ax.YColor = 'black';
 ax.XColor = 'black';
 StandardFigurePBoC(p,gca);
 state_fig.InvertHardcopy = 'off';
-% saveas(state_fig,[FigurePath 'rateLim_trace.png'])
-% saveas(state_fig,[FigurePath 'rateLim_trace.pdf'])
+saveas(state_fig,[FigurePath 'rateLim_trace.png'])
+saveas(state_fig,[FigurePath 'rateLim_trace.pdf'])
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% (2) Make figures showing passage times for different realizations of the two models
+%% (2) Make figures showing passage times for rate-limiting step mode
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+rateLim_sim_indices = find(contains(sim_name_cell,{'1rate-limiting','2rate-limiting','5rate-limiting','15rate-limiting'}));
+close all
+% raw histogram figure
+wt_bins = linspace(0,6,25);
+
+rl_hist_fig = figure;
+cmap = brewermap(2+length(rateLim_sim_indices),'Set2');
+hold on
+iter = length(rateLim_sim_indices);
+for i = fliplr(rateLim_sim_indices)
+  histogram(waiting_time_struct(i).off_waiting_times{1}/60,wt_bins,'Normalization','probability','FaceColor',cmap(1+iter,:));
+  iter = iter - 1;
+end
+
+
