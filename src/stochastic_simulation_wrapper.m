@@ -7,15 +7,6 @@ function bursting_sim_struct = stochastic_simulation_wrapper(bursting_calc_struc
 % project = 'n6';
 addpath('utilities')
 
-% set paths
-% DataPath = ['../out/emergent_bursting/' project '/'];
-
-
-% set stochastic simulation parameters
-% n_sim = 100; % number of indivudal traces to simulate
-% t_sim = 60*60; % duration of each simulation (in seconds)
-% n_calc_points = size(bursting_calc_struct(1).Q,3);
-
 % independent burst chain  first
 bursting_sim_struct = struct;
 % set seed for consistency
