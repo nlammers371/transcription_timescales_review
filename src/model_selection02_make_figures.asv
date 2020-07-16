@@ -20,14 +20,14 @@ load([DataPath 'waiting_time_struct.mat'])
 
 % set basic plot parameters
 t_max = 60;
-ylimTrace = [-0.5 8];
+ylimTrace = [-0.5 6.5];
 n_bound_vec = 0:n_bcd_sites;
 
 % sim name cell
 sim_name_cell = {waiting_time_struct.name};
 
 % define colors
-purple = brighten([171 133 172]/255,.5);
+purple = [171 133 172]/255;
 blue = [190 201 224]/255;
 red = [246 141 100]/255;
 green = [203 220 170]/255;
@@ -67,7 +67,7 @@ ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
 % legend('raw trace','2 state fit')
-set(gca,'Fontsize',14,'YTick',0:7)
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
@@ -80,8 +80,8 @@ saveas(state_fig,[FigurePath 'rateLim_trace.pdf'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% (2) Make figures showing passage times for rate-limiting step mode
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-n_step_vec = [1 2 5 15];
-rateLim_sim_indices = find(ismember(sim_name_cell,{'1rate-limiting steps','2rate-limiting steps','5rate-limiting steps','15rate-limiting steps'}));
+n_step_vec = [1 2 5 10 15];
+rateLim_sim_indices = find(ismember(sim_name_cell,{'1rate-limiting steps','2rate-limiting steps','5rate-limiting steps','10rate-limiting steps','15rate-limiting steps'}));
 close all
 
 
@@ -221,19 +221,16 @@ coop_hist_fig.InvertHardcopy = 'off';
 saveas(coop_hist_fig,[FigurePath 'coop_wt_hist.png'])
 saveas(coop_hist_fig,[FigurePath 'coop_wt_hist.pdf'])
 
-%%
-xmax = 5.5;
-ymax = xmax;
-% make fano factor figure
-marker_cell = {'o','o','^','d','s'};
-plot_indices = [2 rateLim_sim_indices];
+
+%% make fano factor figure
+marker_cell = {'o','o','^','d','p','s'};
+plot_indices = 2:length(waiting_time_struct);
 plot_colors = [blue ; cmap2(2:end-1,:)];
 
 fano_struct = struct;
 
 fano_fig = figure;
 hold on
-plot(linspace(0,max([xmax,ymax])),linspace(0,max([xmax,ymax])),'--','Color','k','LineWidth',1.5);
 iter = 1;
 for p = plot_indices
   wt_cell = waiting_time_struct(p).off_waiting_times_ideal;
@@ -245,29 +242,20 @@ for p = plot_indices
   end
   fano_struct(iter).mean_vec = mean_vec / mean_vec(1);
   fano_struct(iter).std_vec = std_vec / mean_vec(1);  
-    
+  
   % plot
-  if iter~=2
-    scatter(mean_vec/ mean_vec(1),std_vec/ mean_vec(1),60,marker_cell{iter},'MarkerFaceColor',...
-      plot_colors(iter,:),'MarkerEdgeColor','k','MArkerFaceAlpha',0.8)
-  else
-    scatter(mean_vec/ mean_vec(1),std_vec/ mean_vec(1),60,marker_cell{iter},'MarkerFaceColor',...
-      plot_colors(iter,:),'MarkerEdgeColor','k','MArkerFaceAlpha',0.5)
-  end
+  scatter(mean_vec/ mean_vec(1),std_vec/ mean_vec(1),50,marker_cell{iter},'MarkerFaceColor',plot_colors(iter,:),'MarkerEdgeColor','k')
+  
   iter = iter + 1;
 end
 
-xlim([0.5 xmax])
-ylim([0 ymax])
-% grid on
+xlim([0 4.5])
+ylim([0 4.5])
 set(gca,'Fontsize',14)
-ylabel('standard deviation')
+ylabel('standard deviation of passage time from 0->6')
 xlabel('mean passage time from 0->6')
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
 ax.XColor = 'black';
 StandardFigurePBoC(p,gca);
-fano_fig.InvertHardcopy = 'off';
-saveas(fano_fig,[FigurePath 'fano_scatter.png'])
-saveas(fano_fig,[FigurePath 'fano_scatter.pdf'])
