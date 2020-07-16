@@ -172,7 +172,7 @@ for s = sim_indices
       raw_trace = bursting_sim_struct(s).sim_emission_cell{i,n};
       raw_times = bursting_sim_struct(s).sim_time_cell{i,n};
       % select for high and low periods
-      hl_indices = find(raw_trace==0|raw_trace==6);     
+      hl_indices = find(raw_trace==0|raw_trace==n_bcd_sites);     
       condensed_trace = raw_trace(hl_indices);
       % find rise and fall events
       diff_trace = diff([0 condensed_trace]);

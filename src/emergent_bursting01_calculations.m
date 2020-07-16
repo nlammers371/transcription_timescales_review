@@ -55,10 +55,10 @@ mu_vec = -log(mult_vec); % energy contribution from state multiplicities
 
 % specify different binding energies to explore
 ebMax = 4; % in kbT units
-activatorEnergieArray(1,:) = linspace(-ebMax,ebMax,n_calc_points); 
+activatorEnergyArray(1,:) = linspace(-ebMax,ebMax,n_calc_points); 
 
 % specify magnitude of binding synergy
-coopEnergies = -2*activatorEnergieArray/(n_bs-1); % this definition ensures symmetric energy wells
+coopEnergies = -2*activatorEnergyArray/(n_bs-1); % this definition ensures symmetric energy wells
 
 % define a function to calculate state probabilities for a given binding
 % energy and cooperativity. For simplicity, we consider only simple pairwise 
@@ -84,8 +84,8 @@ P_ind_array = NaN(n_states,n_calc_points);
 a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
 
 % calculate metrics for (a) and (b) first
-for eb = 1:length(activatorEnergieArray)  
-  eBind = activatorEnergieArray(eb);
+for eb = 1:length(activatorEnergyArray)  
+  eBind = activatorEnergyArray(eb);
   eCoop = coopEnergies(eb);
   % independent binding
   state_probs_ind = stateProb_fun(eBind,0);  
@@ -152,7 +152,7 @@ eff_toff_off_coop_vec = NaN(1,n_calc_points);
 % state and koff must by high->low
 calc_vec = [1 n_states];
 
-for eb = 1:length(activatorEnergieArray) 
+for eb = 1:length(activatorEnergyArray) 
   % ind
   [eff_ton_ind_vec(eb), eff_toff_ind_vec(eb)] = pt_solve(Q_ind_array(:,:,eb),calc_vec(1),calc_vec(2));
   
@@ -160,7 +160,7 @@ for eb = 1:length(activatorEnergieArray)
   [eff_ton_on_coop_vec(eb), eff_toff_on_coop_vec(eb)] = pt_solve(Q_coop_on_array(:,:,eb),calc_vec(1),calc_vec(2));
 
   % kon-mediated cooperativity
-  [eff_ton_off_coop_vec(eb), eff_toff_off_coop_vec(eb)] = pt_solve(Q_coop_on_array(:,:,eb),calc_vec(1),calc_vec(2)); 
+  [eff_ton_off_coop_vec(eb), eff_toff_off_coop_vec(eb)] = pt_solve(Q_coop_off_array(:,:,eb),calc_vec(1),calc_vec(2)); 
 end
 
 % initialize data structure
@@ -190,7 +190,7 @@ for i = 1:3
   bursting_chain_calc_struct(i).E = n_bound_vec;
   bursting_chain_calc_struct(i).off_rate_basal = off_rate_basal;
   bursting_chain_calc_struct(i).on_rate_basal_vec = on_rate_basal_vec;
-  bursting_chain_calc_struct(i).activatorEnergies = activatorEnergieArray;
+  bursting_chain_calc_struct(i).activatorEnergies = activatorEnergyArray;
   bursting_chain_calc_struct(i).coopEnergies = coopEnergies;
   bursting_chain_calc_struct(i).stateEnergy_fun = stateEnergy_fun;
   bursting_chain_calc_struct(i).stateProb_fun = stateProb_fun;
@@ -277,7 +277,7 @@ for n =1:length(rate_lim_steps_vec)
   bursting_step_calc_struct(n).E = emission_vec;
   bursting_step_calc_struct(n).off_rate_basal = off_rate_basal;
   bursting_step_calc_struct(n).on_rate_basal_vec = on_rate_basal_vec;
-  bursting_step_calc_struct(n).activatorEnergies = activatorEnergieArray;
+  bursting_step_calc_struct(n).activatorEnergies = activatorEnergyArray;
   bursting_step_calc_struct(n).coopEnergies = coopEnergies;
   bursting_step_calc_struct(n).ind_state_vec = ind_state_vec;
 end
