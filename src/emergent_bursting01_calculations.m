@@ -205,7 +205,7 @@ save([DataPath, 'bursting_chain_calc_struct.mat'],'bursting_chain_calc_struct');
 ind_state_vec = [26 176]; % define the two states to lie at the extrema
 
 % set range of switching kinetics to explore
-slow_kinetics_array = [1./eff_toff_off_coop_vec' 1./eff_ton_off_coop_vec']; 
+slow_kinetics_array = [1./eff_ton_off_coop_vec' 1./eff_toff_off_coop_vec']; 
 
 % iterate through different numbers of rate-limiting steps
 bursting_step_calc_struct = struct;
