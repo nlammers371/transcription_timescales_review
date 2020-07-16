@@ -34,7 +34,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%
 
 % now cooperative chain
-simIndicesCoop = 176:4:201;
+simIndices = 176:4:201;
 
 % set seed for consistency
 r_seed_vec = round(rand(1,2+length(bursting_step_calc_struct))*1000);
@@ -43,7 +43,7 @@ disp('Simulating cooperative binding condition...')
 tic
 iter = 1;
 for i = [2 3]
-  bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct(i),simIndicesCoop,n_sim,t_sim,r_seed_vec(iter));
+  bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct(i),simIndices,n_sim,t_sim,r_seed_vec(iter));
   fnames = fieldnames(bursting_temp);
   for f = 1:length(fnames)
     bursting_sim_struct(iter).(fnames{f}) = bursting_temp.(fnames{f});
@@ -55,13 +55,13 @@ toc
 % now iterate through compound chains for rate limiting step
 rng(122);
 
-simIndicesRL = [simIndicesCoop(end-2) simIndicesCoop(end)];
+% simIndices = simIndicesCoop;%[simIndicesCoop(end-2) simIndicesCoop(end)];
 offset = length(bursting_sim_struct);
 
 disp('Simulating rate-limiting step codition...')
 tic
 for i = 1:length(bursting_step_calc_struct)
-  bursting_temp = stochastic_simulation_wrapper(bursting_step_calc_struct(i),simIndicesRL,n_sim,t_sim,r_seed_vec(i));
+  bursting_temp = stochastic_simulation_wrapper(bursting_step_calc_struct(i),simIndices,n_sim,t_sim,r_seed_vec(i));
   fnames = fieldnames(bursting_temp);
   for f = 1:length(fnames)
     bursting_sim_struct(i+offset).(fnames{f}) = bursting_temp.(fnames{f});
@@ -172,7 +172,7 @@ for s = sim_indices
       raw_trace = bursting_sim_struct(s).sim_emission_cell{i,n};
       raw_times = bursting_sim_struct(s).sim_time_cell{i,n};
       % select for high and low periods
-      hl_indices = find(raw_trace==0|raw_trace==6);     
+      hl_indices = find(raw_trace==0|raw_trace==n_bcd_sites);     
       condensed_trace = raw_trace(hl_indices);
       % find rise and fall events
       diff_trace = diff([0 condensed_trace]);
