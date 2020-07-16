@@ -70,7 +70,7 @@ for i = 1:length(bursting_step_calc_struct)
 end
 toc
 
-%%
+
 % set basic parameters
 n_bootstraps = 25;
 emergent_indices = 1:2;
