@@ -233,7 +233,7 @@ fano_struct = struct;
 
 fano_fig = figure;
 hold on
-plot(linspace(0,max([xmax,ymax])),linspace(0,max([xmax,ymax])),'--','Color','k','LineWidth',1.5);
+% plot(linspace(0,max([xmax,ymax])),linspace(0,max([xmax,ymax])),'--','Color','k','LineWidth',1.5);
 iter = 1;
 for p = plot_indices
   wt_cell = waiting_time_struct(p).off_waiting_times_ideal;
@@ -243,22 +243,22 @@ for p = plot_indices
     mean_vec(w) = mean(wt_cell{w});
     std_vec(w) = std(wt_cell{w});
   end
-  fano_struct(iter).mean_vec = mean_vec / mean_vec(1);
-  fano_struct(iter).std_vec = std_vec / mean_vec(1);  
+  fano_struct(iter).mean_vec = mean_vec; %/ mean_vec(1);
+  fano_struct(iter).std_vec = std_vec; %/ mean_vec(1);  
     
   % plot
   if iter~=2
-    scatter(mean_vec/ mean_vec(1),std_vec/ mean_vec(1),60,marker_cell{iter},'MarkerFaceColor',...
+    scatter(mean_vec,std_vec,60,marker_cell{iter},'MarkerFaceColor',...
       plot_colors(iter,:),'MarkerEdgeColor','k','MArkerFaceAlpha',0.8)
   else
-    scatter(mean_vec/ mean_vec(1),std_vec/ mean_vec(1),60,marker_cell{iter},'MarkerFaceColor',...
+    scatter(mean_vec,std_vec,60,marker_cell{iter},'MarkerFaceColor',...
       plot_colors(iter,:),'MarkerEdgeColor','k','MArkerFaceAlpha',0.5)
   end
   iter = iter + 1;
 end
 
-xlim([0.5 xmax])
-ylim([0 ymax])
+% xlim([0.5 xmax])
+% ylim([0 ymax])
 % grid on
 set(gca,'Fontsize',14)
 ylabel('standard deviation')
