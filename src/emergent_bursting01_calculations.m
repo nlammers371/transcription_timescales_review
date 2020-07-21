@@ -122,7 +122,9 @@ for eb = 1:length(activatorEnergyVec)
   rate_coop_off_temp(:,2) = on_rate_basal_vec(1,eb) * (n_bs-n_bound_vec);
   rate_coop_off_temp(2:end,1) = rate_coop_off_temp(1:end-1,2)' .* state_probs_coop(1:end-1) ./ state_probs_coop(2:end);  
   % re-adjust rates to ensure consistency with experimental measurements
-  af = off_rate_basal/(sum(state_probs_coop(2:end).*rate_coop_off_temp(2:end,1)'./n_bound_vec(2:end))/sum(state_probs_coop(2:end)));
+  propensity_vec = rate_coop_off_temp(2:end,1)';
+  basal_vec = rate_coop_off_temp(2:end,1)'./n_bound_vec(2:end);
+  af = off_rate_basal/(sum(state_probs_coop(2:end).*propensity_vec.*basal_vec)/sum(state_probs_coop(2:end).*propensity_vec));
   rate_coop_off_temp = rate_coop_off_temp*af;
   % generator matrix for ind
   c_off_slice = zeros(n_states);
@@ -204,8 +206,9 @@ save([DataPath, 'bursting_chain_calc_struct.mat'],'bursting_chain_calc_struct');
 % now calculate metrics for (c)
 ind_state_vec = [26 176]; % define the two states to lie at the extrema
 
-% set range of switching kinetics to explore
-slow_kinetics_array = [1./eff_ton_off_coop_vec' 1./eff_toff_off_coop_vec']; 
+% set range of switching kinetics to explore (use kon coop model as ref
+% point)
+slow_kinetics_array = [1./eff_ton_on_coop_vec' 1./eff_toff_on_coop_vec']; 
 
 % iterate through different numbers of rate-limiting steps
 bursting_step_calc_struct = struct;
