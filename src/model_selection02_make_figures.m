@@ -44,7 +44,7 @@ rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
 %  extract n bound vec
 rateLim_sim_sub_index = length(waiting_time_struct(rateLim_sim_index).off_waiting_times_ideal);
 % plot results of stochastic simulations
-trace_index = 4;
+trace_index = 8;
 
 state_fig = figure;%('Position',[100 100 1024 512]);
 hold on
@@ -62,12 +62,12 @@ stairs(viterbi_time/60, trace_raw,'Color',purple,'LineWidth',1);
 stairs(viterbi_time/60, viterbi_fit,'Color','k','LineWidth',1.5);
 
 ylim(ylimTrace)
-xlim([0 t_max/2])
+xlim([0 t_max])
 ylabel('transcription rate')
 xlabel('time (minutes)')
 box on
 % legend('raw trace','2 state fit')
-set(gca,'Fontsize',14,'YTick',0:7)
+set(gca,'Fontsize',14,'YTick',0:8)
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
@@ -84,7 +84,8 @@ n_step_vec = [1 2 5 15];
 rateLim_sim_indices = find(ismember(sim_name_cell,{'1rate-limiting steps','2rate-limiting steps','5rate-limiting steps','15rate-limiting steps'}));
 close all
 
-
+plot_index = length(waiting_time_struct(rateLim_sim_indices(1)).off_waiting_times_ideal);
+pt_mean = mean(waiting_time_struct(rateLim_sim_indices(1)).off_waiting_times_ideal{plot_index})/60;
 % define bins for grouping waiting time measurements
 wt_bins = linspace(0,4,50);
 wt_centers = (wt_bins(1:end-1)+wt_bins(2:end))/2;
@@ -93,11 +94,12 @@ wt_centers = (wt_bins(1:end-1)+wt_bins(2:end))/2;
 gamma_fun = @(x) x(1) * x(2)^x(3) .* wt_centers.^(x(3)-1).*exp(-x(2)*wt_centers) ./ gamma(x(3));
 exp_fun = @(x) x(1) * exp(-x(2) .* wt_centers);
 options = optimoptions(@lsqnonlin,'MaxFunctionEvaluations',5e4);
+
 % perform fits
 rl_fit_struct = struct;
 for i = 1:length(rateLim_sim_indices)
-  wt_vec_raw = waiting_time_struct(rateLim_sim_indices(i)).off_waiting_times_ideal{1};
-  wt_vec = wt_vec_raw / mean(wt_vec_raw);
+  wt_vec_raw = waiting_time_struct(rateLim_sim_indices(i)).off_waiting_times_ideal{plot_index};
+  wt_vec = wt_vec_raw  / pt_mean / 60;% mean(wt_vec_raw);
   p_vec = histcounts(wt_vec,wt_bins);
   if i == 1
     fit_obj = @(x) exp_fun(x)-p_vec;
@@ -108,15 +110,12 @@ for i = 1:length(rateLim_sim_indices)
     rl_fit_struct(i).params = lsqnonlin(fit_obj,[1 1 1], [0 0 0],[Inf Inf Inf],options);
     pd_vec = gamma_fun(rl_fit_struct(i).params);
   end  
+%   rl_fit_struct(i).wt_axis = wt_centers * mean(wt_vec_raw);
   rl_fit_struct(i).pd_vec = pd_vec/sum(pd_vec);
   rl_fit_struct(i).p_vec = p_vec / sum(p_vec);
   rl_fit_struct(i).var = var(wt_vec_raw);
   rl_fit_struct(i).mean = mean(wt_vec_raw);
 end
-
-
-
-
 
 
 offset = 2;
@@ -137,16 +136,17 @@ iter = length(rateLim_sim_indices);
 pl = [];
 lgd_str = {};
 for i = fliplr(1:length(rateLim_sim_indices))
-  p_vec = rl_fit_struct(i).p_vec;  
+  p_vec = rl_fit_struct(i).p_vec;
+%   wt_axis = rl_fit_struct(i).wt_axis/60;
   if i == length(rateLim_sim_indices)
-    bar(wt_centers,p_vec,1,'FaceColor',cmap1(i+offset/2,:),'FaceAlpha',1,'EdgeAlpha',0.3);   
+    bar(wt_centers*pt_mean,p_vec,1,'FaceColor',cmap1(i+offset/2,:),'FaceAlpha',1,'EdgeAlpha',0.3);   
   elseif i > 1
-    bar(wt_centers,p_vec,1,'FaceColor',cmap1(i+offset/2,:),'FaceAlpha',.5,'EdgeAlpha',0.3);  
+    bar(wt_centers*pt_mean,p_vec,1,'FaceColor',cmap1(i+offset/2,:),'FaceAlpha',.5,'EdgeAlpha',0.3);  
   else
-    bar(wt_centers,p_vec,1,'FaceColor',cmap1(i+offset/2,:),'FaceAlpha',0.5,'EdgeAlpha',0.3);  
+    bar(wt_centers*pt_mean,p_vec,1,'FaceColor',cmap1(i+offset/2,:),'FaceAlpha',0.5,'EdgeAlpha',0.3);  
   end
   pd_vec = rl_fit_struct(i).pd_vec;
-  pl = [pl plot(wt_centers,pd_vec,'Color',cmap2(i+offset/2,:),'LineWidth',2)]; 
+  pl = [pl plot(wt_centers*pt_mean,pd_vec,'Color',cmap2(i+offset/2,:),'LineWidth',2)]; 
   if i == 1
     lgd_str = [lgd_str{:} {[num2str(n_step_vec(i)) ' step']}];
   else
@@ -158,11 +158,11 @@ end
 %   plot(wt_centers,pd_vec,'Color',cmap(i,:),'LineWidth',2);  
 % end
 
-xlim([0 wt_bins(end)])
+xlim([0 wt_bins(end)*pt_mean])
 ylim([0 .13])
 set(gca,'Fontsize',14)
-ylabel('share')
-xlabel('normalized passage time from 0->6')
+ylabel('probability')
+xlabel('first-pasage time (minutes)')
 p = plot(0,0);
 legend(pl,lgd_str{:});
 ax = gca;
@@ -178,14 +178,13 @@ coop_sim_index = find(ismember(sim_name_cell,{'koff-mediated cooperativity'}));
 sim_vec = 1:length(waiting_time_struct(i).off_waiting_times_ideal);
 plot_index = length(waiting_time_struct(i).off_waiting_times_ideal);
 
-blue = [190 201 224]/255;
 blueDark = brighten(blue,-0.5);
 
 % perform fits
 coop_fit_struct = struct;
 for i = sim_vec
   wt_vec_raw = waiting_time_struct(coop_sim_index).off_waiting_times_ideal{i};
-  wt_vec = wt_vec_raw / mean(wt_vec_raw );    
+  wt_vec = wt_vec_raw / pt_mean / 60;    
   p_vec = histcounts(wt_vec,wt_bins);
   
   fit_obj = @(x) exp_fun(x)-p_vec;
@@ -204,14 +203,14 @@ offset = length(rateLim_sim_indices);
 hold on
 
 p_vec = coop_fit_struct(plot_index).p_vec;  
-bar(wt_centers,p_vec,1,'FaceColor',blue,'FaceAlpha',.7,'EdgeAlpha',0.3);   
+bar(wt_centers*pt_mean,p_vec,1,'FaceColor',blue,'FaceAlpha',.7,'EdgeAlpha',0.3);   
 pd_vec = coop_fit_struct(plot_index).pd_vec;
-plot(wt_centers,pd_vec,'Color',blueDark,'LineWidth',2);  
+plot(wt_centers*pt_mean,pd_vec,'Color',blueDark,'LineWidth',2);  
 
-xlim([0 wt_bins(end)])
+xlim([0 wt_bins(end)*pt_mean])
 set(gca,'Fontsize',14)
-ylabel('share')
-xlabel('normalized passage time from 0->6')
+ylabel('probability')
+xlabel('first-pasage time (minutes)')
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
@@ -222,47 +221,67 @@ saveas(coop_hist_fig,[FigurePath 'coop_wt_hist.png'])
 saveas(coop_hist_fig,[FigurePath 'coop_wt_hist.pdf'])
 
 %%
-xmax = 5.5;
-ymax = xmax;
+xmax = 7;
+ymax = 7;
+n_boots = 10;
 % make fano factor figure
-marker_cell = {'o','o','^','d','s'};
+% marker_cell = {'o','o','^','d','s'};
+marker_cell = {'o','o','o','o','o'};
 plot_indices = [2 rateLim_sim_indices];
-plot_colors = [blue ; cmap2(2:end-1,:)];
+plot_colors = [blueDark ; cmap2(2:end-1,:)];
 
 fano_struct = struct;
 
 fano_fig = figure;
 hold on
-% plot(linspace(0,max([xmax,ymax])),linspace(0,max([xmax,ymax])),'--','Color','k','LineWidth',1.5);
+% plot CV=1
+plot(linspace(0,max([xmax,ymax])),linspace(0,max([xmax,ymax])),'--','Color','k','LineWidth',1);
+% plot CV=2
+plot(linspace(0,max([xmax,ymax])),2*linspace(0,max([xmax,ymax])),'--','Color','k','LineWidth',1);
+% plot CV=1/2
+plot(linspace(0,2*max([xmax,ymax])),linspace(0,max([xmax,ymax])),'--','Color','k','LineWidth',1);
+
 iter = 1;
 for p = plot_indices
   wt_cell = waiting_time_struct(p).off_waiting_times_ideal;
-  mean_vec = NaN(size(wt_cell));
-  std_vec = NaN(size(wt_cell));
+  mean_array = NaN(n_boots,size(wt_cell,2));
+  std_array = NaN(n_boots,size(wt_cell,2));
   for w = 1:length(wt_cell)
-    mean_vec(w) = mean(wt_cell{w});
-    std_vec(w) = std(wt_cell{w});
+    wt_times = wt_cell{w};
+    for n = 1:n_boots
+      boot_indices = randsample(1:length(wt_times),length(wt_times),true);
+      mean_array(n,w) = mean(wt_times(boot_indices));
+      std_array(n,w) = std(wt_times(boot_indices));
+    end
   end
-  fano_struct(iter).mean_vec = mean_vec; %/ mean_vec(1);
-  fano_struct(iter).std_vec = std_vec; %/ mean_vec(1);  
+  fano_struct(iter).mean_vec = nanmean(mean_array)/60;
+  fano_struct(iter).mean_se_vec = nanstd(mean_array)/60;
+  fano_struct(iter).std_vec = nanmean(std_array)/60;
+  fano_struct(iter).std_se_vec = nanstd(std_array)/60;
     
-  % plot
-  if iter~=2
-    scatter(mean_vec,std_vec,60,marker_cell{iter},'MarkerFaceColor',...
-      plot_colors(iter,:),'MarkerEdgeColor','k','MArkerFaceAlpha',0.8)
-  else
-    scatter(mean_vec,std_vec,60,marker_cell{iter},'MarkerFaceColor',...
-      plot_colors(iter,:),'MarkerEdgeColor','k','MArkerFaceAlpha',0.5)
-  end
   iter = iter + 1;
 end
-
-% xlim([0.5 xmax])
-% ylim([0 ymax])
+% for f = 1:length(fano_struct)
+%   yse = fano_struct(f).std_se_vec;
+%   xse = fano_struct(f).mean_se_vec;
+%   errorbar(fano_struct(f).mean_vec,fano_struct(f).std_vec,yse,yse,xse,xse,'.','CapSize',0,'Color','k')
+% end
+for f = 1:length(fano_struct)
+    % plot
+  if f~=2
+    scatter(fano_struct(f).mean_vec,fano_struct(f).std_vec,60,marker_cell{f},'MarkerFaceColor',...
+      plot_colors(f,:),'MarkerEdgeColor','k','MArkerFaceAlpha',1)
+  else
+    scatter(fano_struct(f).mean_vec,fano_struct(f).std_vec,60,marker_cell{f},'MarkerFaceColor',...
+      plot_colors(f,:),'MarkerEdgeColor','k','MArkerFaceAlpha',1)
+  end
+end
+xlim([0 xmax])
+ylim([0 ymax])
 % grid on
-set(gca,'Fontsize',14)
+set(gca,'Fontsize',14,'xtick',0:2:6,'ytick',0:2:6)
 ylabel('standard deviation')
-xlabel('mean passage time from 0->6')
+xlabel('mean first passage time (minutes)')
 p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';

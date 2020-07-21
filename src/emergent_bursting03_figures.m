@@ -99,7 +99,7 @@ for i = 2%ind_plot_indices
     
 end
 
-xlabel('share')
+xlabel('probability')
 box on
 
 p = plot(0,0);
@@ -171,7 +171,7 @@ hist_fig = figure('Position',[100 100 256 512]);
 hold on
 barh(n_bound_vec,stateShares,1,'FaceColor',blue);
   
-xlabel('share')
+xlabel('probability')
 box on
 p = plot(0,0);
 ax = gca;
@@ -232,7 +232,7 @@ hist_fig = figure('Position',[100 100 256 512]);
 hold on
 barh(n_bound_vec,stateShares,1,'FaceColor',red);
   
-xlabel('share')
+xlabel('probability')
 box on
 p = plot(0,0);
 ax = gca;
