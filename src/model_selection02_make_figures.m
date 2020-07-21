@@ -111,7 +111,7 @@ for i = 1:length(rateLim_sim_indices)
     pd_vec = gamma_fun(rl_fit_struct(i).params);
   end  
 %   rl_fit_struct(i).wt_axis = wt_centers * mean(wt_vec_raw);
-  rl_fit_struct(i).pd_vec = pd_vec/sum(pd_vec);
+  rl_fit_struct(i).pd_vec = pd_vec /sum(pd_vec);
   rl_fit_struct(i).p_vec = p_vec / sum(p_vec);
   rl_fit_struct(i).var = var(wt_vec_raw);
   rl_fit_struct(i).mean = mean(wt_vec_raw);
@@ -173,8 +173,8 @@ rl_hist_fig.InvertHardcopy = 'off';
 saveas(rl_hist_fig,[FigurePath 'rateLim_wt_hist.png'])
 saveas(rl_hist_fig,[FigurePath 'rateLim_wt_hist.pdf'])
 
-
-coop_sim_index = find(ismember(sim_name_cell,{'koff-mediated cooperativity'}));
+%%
+coop_sim_index = find(ismember(sim_name_cell,{'kon-mediated cooperativity'}));
 sim_vec = 1:length(waiting_time_struct(i).off_waiting_times_ideal);
 plot_index = length(waiting_time_struct(i).off_waiting_times_ideal);
 
