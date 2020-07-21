@@ -82,7 +82,7 @@ dT = 5; % time res for interpolated data in seconds (effectively our experimenta
 time_vector = 0:dT:60*60;
 n_bound_vec = 0:6;
 n_bs = 6;
-
+%%
 waiting_time_struct = struct;
 iter = 1;
 for s = sim_indices
@@ -178,6 +178,7 @@ for s = sim_indices
       diff_trace = diff([0 condensed_trace]);
       drop_indices = find(diff_trace<0);
       rise_indices = find(diff_trace>0);
+      if ~isempt
       rise_indices = rise_indices(rise_indices>drop_indices(1));
       drop_indices = drop_indices(drop_indices<rise_indices(end));
       % convert back to real time space

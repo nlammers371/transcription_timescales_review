@@ -54,7 +54,7 @@ end
 mu_vec = -log(mult_vec); % energy contribution from state multiplicities
 
 % specify different binding energies to explore
-ebMax = 4; % in kbT units
+ebMax = 5; % in kbT units
 activatorEnergyVec = linspace(-ebMax,ebMax,n_calc_points); 
 
 % specify magnitude of binding synergy

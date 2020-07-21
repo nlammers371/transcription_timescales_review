@@ -82,7 +82,7 @@ dT = 5; % time res for interpolated data in seconds (effectively our experimenta
 time_vector = 0:dT:60*60;
 n_bound_vec = 0:6;
 n_bs = 6;
-
+%%
 waiting_time_struct = struct;
 iter = 1;
 for s = sim_indices
@@ -176,15 +176,18 @@ for s = sim_indices
       condensed_trace = raw_trace(hl_indices);
       % find rise and fall events
       diff_trace = diff([0 condensed_trace]);
-      drop_indices = find(diff_trace<0);
-      rise_indices = find(diff_trace>0);
-      rise_indices = rise_indices(rise_indices>drop_indices(1));
-      drop_indices = drop_indices(drop_indices<rise_indices(end));
-      % convert back to real time space
-      drop_times = raw_times(hl_indices(drop_indices));
-      rise_times = raw_times(hl_indices(rise_indices));
-      % record
-      wt_off_vec_ideal = [wt_off_vec_ideal rise_times-drop_times];
+      drop_indices_raw = find(diff_trace<0);
+      rise_indices_raw = find(diff_trace>0);
+    
+      if ~isempty(rise_indices_raw) && ~isempty(drop_indices_raw)            
+        rise_indices = rise_indices_raw(rise_indices_raw>drop_indices_raw(1));
+        drop_indices = drop_indices_raw(drop_indices_raw<rise_indices_raw(end));
+        % convert back to real time space
+        drop_times = raw_times(hl_indices(drop_indices));
+        rise_times = raw_times(hl_indices(rise_indices));
+        % record
+        wt_off_vec_ideal = [wt_off_vec_ideal rise_times-drop_times];
+      end
     end
     wt_off_cell_hmm{i} = wt_off_vec_hmm;
     wt_off_cell_ideal{i} = wt_off_vec_ideal;

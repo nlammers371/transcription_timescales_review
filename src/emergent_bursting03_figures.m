@@ -123,7 +123,7 @@ close all
 coop_sim_index = find(contains(sim_name_cell,'kon-mediated'));
 
 %  extract n bound vec
-coop_plot_index = size(bursting_sim_struct(2).SS,2);
+coop_plot_index = size(bursting_sim_struct(2).SS,2)-2;
 
 % get average on and off rates
 n_states = 7;
@@ -198,7 +198,7 @@ saveas(hist_fig,[FigurePath 'coop_hist.pdf'])
 rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
 
 %  extract n bound vec
-rateLim_plot_index = size(bursting_sim_struct(rateLim_sim_index).SS,2);
+rateLim_plot_index = coop_plot_index;%size(bursting_sim_struct(rateLim_sim_index).SS,2);
 
 % plot results of stochastic simulations
 trace_index = 18;

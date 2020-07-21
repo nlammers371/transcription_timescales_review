@@ -19,6 +19,10 @@ n_sim = 25; % number of indivudal traces to simulate
 t_sim = 60*60; % duration of each simulation (in seconds)
 % n_calc_points = size(bursting_chain_calc_struct(1).Q,3);
 
+p = gcp('nocreate');
+if isempty(p)
+  parpool(24);
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%
 % independent burst chain  first

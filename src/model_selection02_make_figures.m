@@ -13,11 +13,11 @@ addpath('utilities')
 FigurePath = ['../fig/waiting_time_distributions/' project '/'];
 mkdir(FigurePath)
 DataPath = ['../out/waiting_time_distributions/' project '/'];
-% DataPathSim = ['../out/emergent_bursting/' project '/'];
+DataPathCalc = ['../out/emergent_bursting/' project '/'];
 
 % load data
 load([DataPath 'waiting_time_struct.mat'])
-
+load([DataPathCalc 'bursting_chain_calc_struct.mat'])
 % set basic plot parameters
 t_max = 60;
 ylimTrace = [-0.5 8];
@@ -35,16 +35,16 @@ gray = [0.7020    0.7020    0.7020];
 % cmap1 = [green ; blue ;red];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% (1) Make figure illustrating passage time concept
+%% (1) Make figure illustrating passage time concept
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify appropriate index
 rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
 %
 %  extract n bound vec
-rateLim_sim_sub_index = length(waiting_time_struct(rateLim_sim_index).off_waiting_times_ideal);
+rateLim_sim_sub_index = 6;%length(waiting_time_struct(rateLim_sim_index).off_waiting_times_ideal);
 % plot results of stochastic simulations
-trace_index = 8;
+trace_index = 33;
 
 state_fig = figure;%('Position',[100 100 1024 512]);
 hold on
@@ -84,7 +84,7 @@ n_step_vec = [1 2 5 15];
 rateLim_sim_indices = find(ismember(sim_name_cell,{'1rate-limiting steps','2rate-limiting steps','5rate-limiting steps','15rate-limiting steps'}));
 close all
 
-plot_index = length(waiting_time_struct(rateLim_sim_indices(1)).off_waiting_times_ideal);
+plot_index = 6;%length(waiting_time_struct(rateLim_sim_indices(1)).off_waiting_times_ideal);
 pt_mean = mean(waiting_time_struct(rateLim_sim_indices(1)).off_waiting_times_ideal{plot_index})/60;
 % define bins for grouping waiting time measurements
 wt_bins = linspace(0,4,50);
@@ -176,7 +176,7 @@ saveas(rl_hist_fig,[FigurePath 'rateLim_wt_hist.pdf'])
 %%
 coop_sim_index = find(ismember(sim_name_cell,{'kon-mediated cooperativity'}));
 sim_vec = 1:length(waiting_time_struct(i).off_waiting_times_ideal);
-plot_index = length(waiting_time_struct(i).off_waiting_times_ideal);
+% plot_index = length(waiting_time_struct(i).off_waiting_times_ideal);
 
 blueDark = brighten(blue,-0.5);
 
@@ -221,13 +221,13 @@ saveas(coop_hist_fig,[FigurePath 'coop_wt_hist.png'])
 saveas(coop_hist_fig,[FigurePath 'coop_wt_hist.pdf'])
 
 %%
-xmax = 7;
-ymax = 7;
+xmax = 11;
+ymax = 11;
 n_boots = 10;
 % make fano factor figure
 % marker_cell = {'o','o','^','d','s'};
 marker_cell = {'o','o','o','o','o'};
-plot_indices = [2 rateLim_sim_indices];
+plot_indices = [1 rateLim_sim_indices];
 plot_colors = [blueDark ; cmap2(2:end-1,:)];
 
 fano_struct = struct;
@@ -268,18 +268,19 @@ end
 % end
 for f = 1:length(fano_struct)
     % plot
-  if f~=2
-    scatter(fano_struct(f).mean_vec,fano_struct(f).std_vec,60,marker_cell{f},'MarkerFaceColor',...
-      plot_colors(f,:),'MarkerEdgeColor','k','MArkerFaceAlpha',1)
+  if f~=1
+    scatter(fano_struct(f).mean_vec,fano_struct(f).std_vec,50,'s',marker_cell{f},'MarkerFaceColor',...
+      plot_colors(f,:),'MarkerEdgeColor','k','MarkerFaceAlpha',0.75)
   else
-    scatter(fano_struct(f).mean_vec,fano_struct(f).std_vec,60,marker_cell{f},'MarkerFaceColor',...
-      plot_colors(f,:),'MarkerEdgeColor','k','MArkerFaceAlpha',1)
+    scatter(fano_struct(f).mean_vec,fano_struct(f).std_vec,75,'o',marker_cell{f},'MarkerFaceColor',...
+      plot_colors(f,:),'MarkerEdgeColor','k','MarkerFaceAlpha',1)
   end
 end
+
 xlim([0 xmax])
 ylim([0 ymax])
 % grid on
-set(gca,'Fontsize',14,'xtick',0:2:6,'ytick',0:2:6)
+set(gca,'Fontsize',14)
 ylabel('standard deviation')
 xlabel('mean first passage time (minutes)')
 p = plot(0,0);
