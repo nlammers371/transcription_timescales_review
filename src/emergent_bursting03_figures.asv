@@ -118,29 +118,27 @@ saveas(hist_fig,[FigurePath 'no-coop_hist.pdf'])
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (b) cooperative binding 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-close all
+
 % specify appropriate index
-coop_sim_index = find(contains(sim_name_cell,'kon-mediated'));
+coop_sim_index = find(contains(sim_name_cell,'koff-mediated'));
 
 %  extract n bound vec
-coop_plot_index = size(bursting_sim_struct(2).SS,2);
+coop_plot_index = size(bursting_sim_struct(2).SS,2)-1;
 
 % get average on and off rates
 n_states = 7;
-SS = bursting_sim_struct(coop_sim_index).SS(:,end-1);
+SS =bursting_sim_struct(coop_sim_index).SS(:,end-1);
 Q = bursting_sim_struct(coop_sim_index).Q(:,:,end-1)';
 a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
 off_col = Q(m3&~m4);
 on_col = Q(m1&~m2);
-off_rates = off_col./n_bound_vec(2:end)'
-off_mean = SS(2:end)'*(off_rates.*off_col) / sum(SS(2:end).*off_col)
-% off_freqs = 
+off_mean = SS(2:end)'*(off_col./n_bound_vec(2:end)') / sum(SS(2:end))
 on_mean = SS(1:end-1)'*(on_col./(n_states-1-n_bound_vec(1:end-1)')) / sum(SS(1:end-1))
 
 %
 % plot results of stochastic simulations
 
-trace_index = 9;
+trace_index = 6;
 
 state_fig = figure;
 cmap2 = brewermap(9,'Set2');
@@ -198,10 +196,10 @@ saveas(hist_fig,[FigurePath 'coop_hist.pdf'])
 rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
 
 %  extract n bound vec
-rateLim_plot_index = size(bursting_sim_struct(rateLim_sim_index).SS,2);
+rateLim_plot_index = size(bursting_sim_struct(2).SS,2);
 
 % plot results of stochastic simulations
-trace_index = 18;
+trace_index = 5;
 
 state_fig = figure;
 hold on

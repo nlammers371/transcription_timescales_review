@@ -1,5 +1,4 @@
-% conduct small-scale simulations to generate illustrative traces for
-% Figure 3
+% conduct small-scale simulations to generate illustrative traces 
 clear
 close all
 addpath('utilities')
@@ -33,8 +32,8 @@ bursting_sim_struct = struct;
 % record key info
 
 disp('Simulating independent binding condition...')
-tic  
-bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct(ind_index),ind_sub_index,n_sim,t_sim,r_seed);
+tic
+bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct,ind_index,ind_sub_index,n_sim,t_sim,r_seed);
 fnames = fieldnames(bursting_temp);
 for f = 1:length(fnames)
   bursting_sim_struct(1).(fnames{f}) = bursting_temp.(fnames{f});
@@ -49,12 +48,12 @@ toc
 simIndicesCoop = 176:4:201;
 
 % set seed for consistency
-r_seed_vec = round(rand(1,length(bursting_step_calc_struct)+2)*1000);
+r_seed_coop_vec = [231 111];
 disp('Simulating cooperative binding condition...')
 tic
 iter = 1;
 for i = [2 3]
-  bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct(i),simIndicesCoop,n_sim,t_sim,r_seed_vec(iter));
+  bursting_temp = stochastic_simulation_wrapper(bursting_chain_calc_struct,i,simIndicesCoop,n_sim,t_sim,r_seed_coop_vec(iter));
   fnames = fieldnames(bursting_temp);
   for f = 1:length(fnames)
     bursting_sim_struct(i).(fnames{f}) = bursting_temp.(fnames{f});
@@ -66,16 +65,16 @@ toc
 % now iterate through compound chains for rate limiting step
 rng(122);
 r_seed_rl_vec = round(rand(1,length(bursting_step_calc_struct))*1000);
-simIndicesRL = simIndicesCoop;%[simIndicesCoop(end-2) simIndicesCoop(end)];
+simIndicesRL = [simIndicesCoop(end-2) simIndicesCoop(end)];
 offset = length(bursting_sim_struct);
 
 disp('Simulating rate-limiting step codition...')
 tic
-for i = 2%1:length(bursting_step_calc_struct)
-  bursting_temp = stochastic_simulation_wrapper(bursting_step_calc_struct(i),simIndicesRL,n_sim,t_sim,r_seed_rl_vec(iter));
+for i = 1:length(bursting_step_calc_struct)
+  bursting_temp = stochastic_simulation_wrapper(bursting_step_calc_struct,i,simIndicesRL,n_sim,t_sim,r_seed_rl_vec(i));
   fnames = fieldnames(bursting_temp);
   for f = 1:length(fnames)
-    bursting_sim_struct(iter+1).(fnames{f}) = bursting_temp.(fnames{f});
+    bursting_sim_struct(i+offset).(fnames{f}) = bursting_temp.(fnames{f});
   end
   iter = iter + 1;
 end
