@@ -57,7 +57,7 @@ StandardFigurePBoC(p,gca);
 multiplicity_fig.InvertHardcopy = 'off';
 saveas(multiplicity_fig,[FigurePath 'multiplicity_fig.png'])
 saveas(multiplicity_fig,[FigurePath 'multiplicity_fig.pdf'])
-%%
+
 % independent binding figs
 ind_name = 'independent';
 chain_calc_names = {bursting_chain_calc_struct.name};
@@ -67,58 +67,58 @@ ind_index = find(contains(chain_calc_names,ind_name));
 eb_energies = bursting_chain_calc_struct(ind_index).activatorEnergies;
 plot_index = 1:10:length(eb_energies);
 
-ind_energy_fig = figure;
-hold on
+% ind_energy_fig = figure;
+% hold on
 cmap1 = brewermap(length(plot_index),'RdYlBu');
-
-for e = 1:length(plot_index)
-  e_vec = stateEnergy_fun(eb_energies(plot_index(e)),0);
-  plot(n_bound_vec,e_vec,'Color',cmap1(e,:))
-end
-
-p = plot(0,0);
-% ylim(ylimTrace)
-% xlim([0 t_max])
-xlabel('binding state')
-ylabel('state energy (k_bT)')
-box on
-set(gca,'Fontsize',14)
-% set(gca,'yScale','log')
-ax = gca;
-ax.YColor = 'black';
-ax.XColor = 'black';
-% ax.Color = pboc;
-StandardFigurePBoC(p,gca);
-ind_energy_fig.InvertHardcopy = 'off';
-saveas(ind_energy_fig,[FigurePath 'ind_energies.png'])
-saveas(ind_energy_fig,[FigurePath 'ind_energies.pdf'])
-
-
-ind_prob_fig = figure;
-hold on
-cmap1 = brewermap(length(plot_index),'RdYlBu');
-for e = 1:length(plot_index)
-  p_vec = stateProb_fun(eb_energies(plot_index(e)),0);
-  plot(n_bound_vec,p_vec,'Color',cmap1(e,:))
-end
+% 
+% for e = 1:length(plot_index)
+%   e_vec = stateEnergy_fun(eb_energies(plot_index(e)),0);
+%   plot(n_bound_vec,e_vec,'Color',cmap1(e,:))
+% end
+% 
 % p = plot(0,0);
-% ylim(ylimTrace)
-% xlim([0 t_max])
-xlabel('binding state')
-ylabel('probability')
-box on
-set(gca,'Fontsize',14)
-% set(gca,'yScale','log')
-ax = gca;
-ax.YColor = 'black';
-ax.XColor = 'black';
-% ax.Color = pboc;
-StandardFigurePBoC(p,gca);
-ind_prob_fig.InvertHardcopy = 'off';
-saveas(ind_prob_fig,[FigurePath 'ind_probs.png'])
-saveas(ind_prob_fig,[FigurePath 'ind_probs.pdf'])
-
-%%
+% % ylim(ylimTrace)
+% % xlim([0 t_max])
+% xlabel('binding state')
+% ylabel('state energy (k_bT)')
+% box on
+% set(gca,'Fontsize',14)
+% % set(gca,'yScale','log')
+% ax = gca;
+% ax.YColor = 'black';
+% ax.XColor = 'black';
+% % ax.Color = pboc;
+% StandardFigurePBoC(p,gca);
+% ind_energy_fig.InvertHardcopy = 'off';
+% saveas(ind_energy_fig,[FigurePath 'ind_energies.png'])
+% saveas(ind_energy_fig,[FigurePath 'ind_energies.pdf'])
+% 
+% 
+% ind_prob_fig = figure;
+% hold on
+% cmap1 = brewermap(length(plot_index),'RdYlBu');
+% for e = 1:length(plot_index)
+%   p_vec = stateProb_fun(eb_energies(plot_index(e)),0);
+%   plot(n_bound_vec,p_vec,'Color',cmap1(e,:))
+% end
+% % p = plot(0,0);
+% % ylim(ylimTrace)
+% % xlim([0 t_max])
+% xlabel('binding state')
+% ylabel('probability')
+% box on
+% set(gca,'Fontsize',14)
+% % set(gca,'yScale','log')
+% ax = gca;
+% ax.YColor = 'black';
+% ax.XColor = 'black';
+% % ax.Color = pboc;
+% StandardFigurePBoC(p,gca);
+% ind_prob_fig.InvertHardcopy = 'off';
+% saveas(ind_prob_fig,[FigurePath 'ind_probs.png'])
+% saveas(ind_prob_fig,[FigurePath 'ind_probs.pdf'])
+% 
+% 
 exi = [1 ceil(length(plot_index)/2) length(plot_index)];
 
 ind_ex_fig1 = figure;
@@ -130,6 +130,7 @@ end
 p = plot(0,0);
 % ylim(ylimTrace)
 % xlim([0 t_max])
+legend('positive \epsilon_b', 'negligible \epsilon_b','negative \epsilon_b','Location','northwest')
 xlabel('binding state')
 ylabel('energy (k_bT)')
 box on
@@ -158,6 +159,7 @@ xlabel('binding state')
 ylabel('probability')
 box on
 set(gca,'Fontsize',14)
+legend('positive \epsilon_b', 'negligible \epsilon_b','negative \epsilon_b','Location','northwest')
 % set(gca,'yScale','log')
 ax = gca;
 ax.YColor = 'black';
@@ -168,15 +170,15 @@ ind_ex_fig2.InvertHardcopy = 'off';
 saveas(ind_ex_fig2,[FigurePath 'ind_example_probs.png'])
 saveas(ind_ex_fig2,[FigurePath 'ind_example_probs.pdf'])
 
-%%
+
 
 % get index
-off_name = 'koff-mediated';
-off_index = find(contains(chain_calc_names,off_name));
+coop_name = 'kon-mediated';
+coop_index = find(contains(chain_calc_names,coop_name));
 
 % get energy vectors
-eb_energies = bursting_chain_calc_struct(off_index).activatorEnergies;
-ec_energies = bursting_chain_calc_struct(off_index).coopEnergies;
+eb_energies = bursting_chain_calc_struct(coop_index).activatorEnergies;
+ec_energies = bursting_chain_calc_struct(coop_index).coopEnergies;
 
 
 coop_energy_fig = figure;
@@ -235,21 +237,22 @@ saveas(coop_prob_fig,[FigurePath 'coop_probs.pdf'])
 et_fig = figure;
 hold on
 cmap2 = brewermap(9,'Set2');
-scatter(bursting_chain_calc_struct(off_index).activatorEnergies,...
-  bursting_chain_calc_struct(off_index).eff_rates(:,1)*60,'MarkerFaceColor',cmap2(3,:),'MarkerEdgeColor','k')
+scatter(bursting_chain_calc_struct(coop_index).activatorEnergies,...
+  1/60./bursting_chain_calc_struct(coop_index).eff_rates(:,1),'MarkerFaceColor',cmap2(3,:),'MarkerEdgeColor','k')
 % ylim(ylimTrace)
-% xlim([0 t_max])
+xlim([0 5])
 xlabel('binding energy (k_bT)')
-ylabel('rate of passage from 0 to 6 (1/min)')
+ylabel('first-passage time (minutes)')
 box on
 % grid on
 set(gca,'Fontsize',14)
-% set(gca,'yScale','log')
+set(gca,'yScale','log')
 ax = gca;
 ax.YColor = 'black';
 ax.XColor = 'black';
-% ax.Color = pboc;
-StandardFigurePBoC(p,gca);
+ax.Color = pboc;
+grid on
+% StandardFigurePBoC(p,gca);
 et_fig.InvertHardcopy = 'off';
 saveas(et_fig,[FigurePath 'et_vs_eb.png'])
 saveas(et_fig,[FigurePath 'et_vs_eb.pdf'])

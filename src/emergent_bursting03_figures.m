@@ -106,7 +106,7 @@ p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
 ax.XColor = 'black';
-xlim([0 0.5])
+xlim([0 0.55])
 set(gca,'Fontsize',14,'xtick',0:.25:.5)
 ylim([n_bound_vec(1)-0.5 n_bound_vec(end)+0.5])
 StandardFigurePBoC(p,gca);
@@ -114,7 +114,7 @@ hist_fig.InvertHardcopy = 'off';
 saveas(hist_fig,[FigurePath 'no-coop_hist.png'])
 saveas(hist_fig,[FigurePath 'no-coop_hist.pdf'])
 
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (b) cooperative binding 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,24 +123,24 @@ close all
 coop_sim_index = find(contains(sim_name_cell,'kon-mediated'));
 
 %  extract n bound vec
-coop_plot_index = size(bursting_sim_struct(2).SS,2)-2;
+coop_plot_index = 6;%size(bursting_sim_struct(2).SS,2)-2;
 
 % get average on and off rates
-n_states = 7;
-SS = bursting_sim_struct(coop_sim_index).SS(:,end-1);
-Q = bursting_sim_struct(coop_sim_index).Q(:,:,end-1)';
-a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
-off_col = Q(m3&~m4);
-on_col = Q(m1&~m2);
-off_rates = off_col./n_bound_vec(2:end)'
-off_mean = SS(2:end)'*(off_rates.*off_col) / sum(SS(2:end).*off_col)
+% n_states = 7;
+% SS = bursting_sim_struct(coop_sim_index).SS(:,coop_plot_index);
+% Q = bursting_sim_struct(coop_sim_index).Q(:,:,coop_plot_index)';
+% a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
+% off_col = Q(m3&~m4);
+% on_col = Q(m1&~m2);
+% on_rates = on_col./(6-n_bound_vec(1:end-1))'
+% on_mean = SS(1:end-1)'*(on_rates.*on_col) / sum(SS(1:end-1).*on_col)
 % off_freqs = 
-on_mean = SS(1:end-1)'*(on_col./(n_states-1-n_bound_vec(1:end-1)')) / sum(SS(1:end-1))
+% on_mean = SS(1:end-1)'*(on_col./(n_states-1-n_bound_vec(1:end-1)')) / sum(SS(1:end-1))
 
 %
 % plot results of stochastic simulations
 
-trace_index = 9;
+trace_index = 23;
 
 state_fig = figure;
 cmap2 = brewermap(9,'Set2');
@@ -158,9 +158,9 @@ xlabel('time (minutes)')
 box on
 set(gca,'Fontsize',14,'YTick',n_bound_vec)
 p = plot(0,0);
-ax = gca;
-ax.YColor = 'black';
-ax.XColor = 'black';
+% ax = gca;
+% ax.YColor = 'black';
+% ax.XColor = 'black';
 StandardFigurePBoC(p,gca);
 state_fig.InvertHardcopy = 'off';
 saveas(state_fig,[FigurePath 'coop_trace.png'])
@@ -178,10 +178,10 @@ barh(n_bound_vec,stateShares,1,'FaceColor',blue);
 xlabel('probability')
 box on
 p = plot(0,0);
-ax = gca;
-ax.YColor = 'black';
-xlim([0 0.5])
-ax.XColor = 'black';
+% ax = gca;
+% ax.YColor = 'black';
+xlim([0 0.55])
+% ax.XColor = 'black';
 set(gca,'Fontsize',14,'xtick',0:.25:.5)
 ylim([n_bound_vec(1)-0.5 n_bound_vec(end)+0.5])
 StandardFigurePBoC(p,gca);
@@ -189,7 +189,7 @@ StandardFigurePBoC(p,gca);
 hist_fig.InvertHardcopy = 'off';
 saveas(hist_fig,[FigurePath 'coop_hist.png'])
 saveas(hist_fig,[FigurePath 'coop_hist.pdf'])
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (c) rate-limiting step
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -201,7 +201,7 @@ rateLim_sim_index = find(contains(sim_name_cell,'2rate-limiting'));
 rateLim_plot_index = coop_plot_index;%size(bursting_sim_struct(rateLim_sim_index).SS,2);
 
 % plot results of stochastic simulations
-trace_index = 18;
+trace_index = 5;
 
 state_fig = figure;
 hold on
@@ -242,7 +242,7 @@ p = plot(0,0);
 ax = gca;
 ax.YColor = 'black';
 ax.XColor = 'black';
-xlim([0 0.5])
+xlim([0 0.55])
 ylim([n_bound_vec(1)-0.5 n_bound_vec(end)+0.5])
 StandardFigurePBoC(p,gca);
 set(gca,'Fontsize',14,'xtick',0:.25:.5)

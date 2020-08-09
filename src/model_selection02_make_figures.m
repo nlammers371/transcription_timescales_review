@@ -35,7 +35,7 @@ gray = [0.7020    0.7020    0.7020];
 % cmap1 = [green ; blue ;red];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% (1) Make figure illustrating passage time concept
+% (1) Make figure illustrating passage time concept
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify appropriate index
@@ -173,7 +173,7 @@ rl_hist_fig.InvertHardcopy = 'off';
 saveas(rl_hist_fig,[FigurePath 'rateLim_wt_hist.png'])
 saveas(rl_hist_fig,[FigurePath 'rateLim_wt_hist.pdf'])
 
-%%
+
 coop_sim_index = find(ismember(sim_name_cell,{'kon-mediated cooperativity'}));
 sim_vec = 1:length(waiting_time_struct(i).off_waiting_times_ideal);
 % plot_index = length(waiting_time_struct(i).off_waiting_times_ideal);
@@ -220,7 +220,7 @@ coop_hist_fig.InvertHardcopy = 'off';
 saveas(coop_hist_fig,[FigurePath 'coop_wt_hist.png'])
 saveas(coop_hist_fig,[FigurePath 'coop_wt_hist.pdf'])
 
-%%
+
 xmax = 11;
 ymax = 11;
 n_boots = 10;
@@ -270,7 +270,7 @@ for f = 1:length(fano_struct)
     % plot
   if f~=1
     scatter(fano_struct(f).mean_vec,fano_struct(f).std_vec,50,'s',marker_cell{f},'MarkerFaceColor',...
-      plot_colors(f,:),'MarkerEdgeColor','k','MarkerFaceAlpha',0.75)
+      plot_colors(f,:),'MarkerEdgeColor','k','MarkerFaceAlpha',1)
   else
     scatter(fano_struct(f).mean_vec,fano_struct(f).std_vec,75,'o',marker_cell{f},'MarkerFaceColor',...
       plot_colors(f,:),'MarkerEdgeColor','k','MarkerFaceAlpha',1)
