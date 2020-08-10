@@ -126,12 +126,12 @@ coop_sim_index = find(contains(sim_name_cell,'kon-mediated'));
 coop_plot_index = 6;%size(bursting_sim_struct(2).SS,2)-2;
 
 % get average on and off rates
-% n_states = 7;
-% SS = bursting_sim_struct(coop_sim_index).SS(:,coop_plot_index);
-% Q = bursting_sim_struct(coop_sim_index).Q(:,:,coop_plot_index)';
-% a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
-% off_col = Q(m3&~m4);
-% on_col = Q(m1&~m2);
+n_states = 7;
+SS = bursting_sim_struct(coop_sim_index).SS(:,coop_plot_index);
+Q = bursting_sim_struct(coop_sim_index).Q(:,:,coop_plot_index)';
+a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
+off_col = Q(m3&~m4);
+on_col = Q(m1&~m2);
 % on_rates = on_col./(6-n_bound_vec(1:end-1))'
 % on_mean = SS(1:end-1)'*(on_rates.*on_col) / sum(SS(1:end-1).*on_col)
 % off_freqs = 

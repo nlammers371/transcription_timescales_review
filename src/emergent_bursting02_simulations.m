@@ -5,7 +5,7 @@ close all
 addpath('utilities')
 
 % load numeric results
-project = 'n2';
+project = 'n6';
 addpath('utilities')
 
 % set paths
