@@ -60,7 +60,7 @@ mu_vec = -log(mult_vec); % energy contribution from state multiplicities
 % coopEnergies = -2*activatorEnergyVec/(n_bs-1); % this definition ensures symmetric energy wells
 
 ecMax = 2;
-coopEnergies = linspace(-ecMax,ecMax,n_calc_points); 
+coopEnergies = fliplr(linspace(-ecMax,ecMax,n_calc_points)); 
 activatorEnergyVec = -0.5*coopEnergies*(n_bs-1);
 
 % define a function to calculate state probabilities for a given binding

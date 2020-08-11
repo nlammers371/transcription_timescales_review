@@ -34,7 +34,7 @@ gray = [0.7020    0.7020    0.7020];
 cmap1 = [green ; blue ;red];
 
 % define resampling time res
-resamp_freq = 1; % 1/seconds
+resamp_freq = 1; % slow the 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (a) independent binding (null model)
@@ -113,7 +113,7 @@ StandardFigurePBoC(p,gca);
 hist_fig.InvertHardcopy = 'off';
 saveas(hist_fig,[FigurePath 'no-coop_hist.png'])
 saveas(hist_fig,[FigurePath 'no-coop_hist.pdf'])
-
+%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (b) cooperative binding 
@@ -165,6 +165,26 @@ StandardFigurePBoC(p,gca);
 state_fig.InvertHardcopy = 'off';
 saveas(state_fig,[FigurePath 'coop_trace.png'])
 saveas(state_fig,[FigurePath 'coop_trace.pdf'])
+
+
+state_fig_hr = figure;
+hold on
+stairs(time_raw/60, trace_raw,'Color',blue,'LineWidth',.75);
+
+ylim(ylimTrace)
+xlim([27 30])
+ylabel('transcription rate')
+xlabel('time (minutes)')
+box on
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
+p = plot(0,0);
+% ax = gca;
+% ax.YColor = 'black';
+% ax.XColor = 'black';
+StandardFigurePBoC(p,gca);
+state_fig_hr.InvertHardcopy = 'off';
+saveas(state_fig_hr,[FigurePath 'coop_trace_hr.png'])
+saveas(state_fig_hr,[FigurePath 'coop_trace_hr.pdf'])
 
 % calculate fraction of time in eac state
 dur_vec = diff([time_raw t_max*60]);
