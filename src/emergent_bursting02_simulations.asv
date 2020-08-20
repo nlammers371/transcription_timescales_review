@@ -32,7 +32,7 @@ model_names = {bursting_chain_calc_struct.name};
 ind_index = find(strcmp(model_names,'independent')); 
 % pick intermediate parameter values where K_d=1, such that <r>=N/2
 sim_param_index_ind = ceil(size(bursting_chain_calc_struct(ind_index).Q,3)/2);  
-% seed for consistency (this doesn't do much)
+% seed for consistency
 r_seed = 123;
 
 bursting_sim_struct = struct;
@@ -72,14 +72,13 @@ toc
 % now iterate through compound chains for rate limiting step
 rng(122);
 r_seed_rl_vec = round(rand(1,length(bursting_step_calc_struct))*1000);
-rl_index = 2; % only simulate 2 rate-limiting step case
-sim_param_indices_RL = sim_param_indices_coop; % simulate systems with same dynamics as cooperative case 
-offset = length(bursting_sim_struct); % for book-keeping
+simIndicesRL = sim_param_indices_coop;%[simIndicesCoop(end-2) simIndicesCoop(end)];
+offset = length(bursting_sim_struct);
 
 disp('Simulating rate-limiting step codition...')
 tic
-for i = rl_index
-  bursting_temp = stochastic_simulation_wrapper(bursting_step_calc_struct(i),sim_param_indices_RL,n_sim,t_sim,r_seed_rl_vec(iter));
+for i = 2%1:length(bursting_step_calc_struct)
+  bursting_temp = stochastic_simulation_wrapper(bursting_step_calc_struct(i),simIndicesRL,n_sim,t_sim,r_seed_rl_vec(iter));
   fnames = fieldnames(bursting_temp);
   for f = 1:length(fnames)
     bursting_sim_struct(iter+1).(fnames{f}) = bursting_temp.(fnames{f});
@@ -87,5 +86,5 @@ for i = rl_index
   iter = iter + 1;
 end
 toc
-% save
+
 save([DataPath, 'bursting_sim_struct.mat'],'bursting_sim_struct');

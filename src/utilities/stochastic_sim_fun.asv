@@ -8,13 +8,8 @@ function [sim_state_cell, sim_emission_cell, sim_time_cell] = stochastic_sim_fun
 
 
 % OUTPUT
-% sim_state_cell : 1 X n_sim cell array with each entry containing state
-%                 sequence for corresponding simulation
-% sim_emission_cell : 1 X n_sim cell array with each entry containing
-%                 transcription rate sequence 
-% sim_time_cell : 1 X n_sim cell array with each entry containing
-%                 time of jump from one state to the next
-
+% sim_state_cell : 1 X n_sim cell array with each entry containing
+% *_lin.mat : Schnitzcell nuclear tracking is modified here.
 
   % state options
   state_option_vec = 1:size(Q,1);

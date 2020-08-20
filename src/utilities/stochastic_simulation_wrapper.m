@@ -3,10 +3,6 @@
 function bursting_sim_struct = stochastic_simulation_wrapper(bursting_calc_struct,simSubIndices,n_sim,t_sim,r_seed)
 
 
-% load numeric results
-% project = 'n6';
-addpath('utilities')
-
 % independent burst chain  first
 bursting_sim_struct = struct;
 % set seed for consistency
@@ -25,7 +21,7 @@ for p = 1:length(simSubIndices)
     bursting_sim_struct.SSFull(:,p) = bursting_sim_struct.SS(:,p);
   end
   
-  % call sim function
+  % call core stochastic simulation function
   [bursting_sim_struct.sim_emission_cell(p,:), bursting_sim_struct.sim_emission_cell(p,:),bursting_sim_struct.sim_time_cell(p,:)] = ...
         stochastic_sim_fun(bursting_sim_struct.Q(:,:,p), bursting_sim_struct.SSFull(:,p),bursting_sim_struct.E,n_sim,t_sim);
 

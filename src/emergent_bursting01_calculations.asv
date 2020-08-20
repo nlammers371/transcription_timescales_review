@@ -50,9 +50,9 @@ end
 mu_vec = -log(mult_vec); % energy contribution from state multiplicities
 
 % specify different binding energies to explore
-ecMax = 2; % ec corresponds to negative log of omega term in text (ec=-log(w))
+ecMax = 2;
 coopEnergies = fliplr(linspace(-ecMax,ecMax,n_calc_points)); 
-activatorEnergyVec = -0.5*coopEnergies*(n_bs-1); % this definition ensures symmetric state probabilities (simply for convenience)
+activatorEnergyVec = -0.5*coopEnergies*(n_bs-1); % this definition ensures symmetric chains
 
 % define a function to calculate state probabilities for a given binding
 % energy and cooperativity. For simplicity, we consider only simple pairwise 
@@ -87,7 +87,6 @@ for eb = 1:length(activatorEnergyVec)
   % cooperativity
   state_probs_coop = stateProb_fun(eBind,eCoop);    
   P_coop_array(:,eb) = state_probs_coop;
-  
   % calculate basal on rate using detailed balance
   on_rate_basal_vec(eb) = off_rate_basal * state_probs_ind(2) / state_probs_ind(1) / n_bs;
 
@@ -130,7 +129,7 @@ for eb = 1:length(activatorEnergyVec)
 
 end
 
-% solve for effective on and off rates (0<->6). This is not strictly necessary but
+% solve for effective on and off rates. This is not strictly necessary but
 % will be used as a consistency check that stochastic simulations are
 % behaving as expected
 
@@ -189,6 +188,8 @@ for i = 1:3
   bursting_chain_calc_struct(i).on_rate_basal_vec = on_rate_basal_vec;
   bursting_chain_calc_struct(i).activatorEnergies = activatorEnergyVec;
   bursting_chain_calc_struct(i).coopEnergies = coopEnergies;
+%   bursting_chain_calc_struct(i).stateEnergy_fun = stateEnergy_fun;
+%   bursting_chain_calc_struct(i).stateProb_fun = stateProb_fun;
 end
 save([DataPath, 'bursting_chain_calc_struct.mat'],'bursting_chain_calc_struct');
 
@@ -197,7 +198,7 @@ save([DataPath, 'bursting_chain_calc_struct.mat'],'bursting_chain_calc_struct');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % now calculate metrics for (c)
-ind_state_vec = [26 176]; % define the two states to lie near the extrema
+ind_state_vec = [26 176]; % define the two states to lie at the extrema
 
 % set range of switching kinetics to explore (use kon coop model as ref
 % point)
@@ -260,6 +261,9 @@ for n =1:length(rate_lim_steps_vec)
     Q_slice(eye(size(Q_slice))==1) = 0;
     Q_slice(eye(size(Q_slice))==1) = -sum(Q_slice);
     Q_rate_lim_array(:,:,eb) = Q_slice';   
+    if eb==196 && rate_lim_steps_vec(n)==2
+      error('asfa')
+    end
   end
   
   % record
