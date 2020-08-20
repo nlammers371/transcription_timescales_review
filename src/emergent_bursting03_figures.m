@@ -34,7 +34,7 @@ gray = [0.7020    0.7020    0.7020];
 cmap1 = [green ; blue ;red];
 
 % define resampling time res
-resamp_freq = 1; % slow the 
+resamp_res = 0.5; % slow the 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (a) independent binding (null model)
@@ -49,16 +49,17 @@ ind_plot_indices = 1:3;
 
 % plot results of stochastic simulations
 trace_index = 2;
-
+time_rs = 0:resamp_res:3600;
 state_fig = figure;
 hold on
 % generate resampled trace (moving average, essentially)
 for i = 1%[2 1 3]%ind_plot_indices
   time_raw = double(bursting_sim_struct(ind_sim_index).sim_time_cell{i,trace_index});
   trace_raw = double(bursting_sim_struct(ind_sim_index).sim_emission_cell{i,trace_index});
-  [trace_rs, time_rs] = resample(trace_raw,time_raw,resamp_freq,'pchip');
+%   [trace_rs, time_rs] = resample(trace_raw,time_raw,resamp_freq,'pchip');
+  trace_rs = interp1(time_raw,trace_raw,time_rs);
 
-  plot(time_rs/60, trace_rs,'Color',green,'LineWidth',1.5);
+  plot(time_rs/60, trace_rs,'Color',[green,0.25],'LineWidth',1.5);
 end
 ylim(ylimTrace)
 xlim([0 t_max])
@@ -113,7 +114,7 @@ StandardFigurePBoC(p,gca);
 hist_fig.InvertHardcopy = 'off';
 saveas(hist_fig,[FigurePath 'no-coop_hist.png'])
 saveas(hist_fig,[FigurePath 'no-coop_hist.pdf'])
-%%
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % (b) cooperative binding 
@@ -146,10 +147,12 @@ state_fig = figure;
 cmap2 = brewermap(9,'Set2');
 hold on
 % generate resampled trace (moving average, essentially)
-time_raw = double(bursting_sim_struct(coop_sim_index).sim_time_cell{coop_plot_index,trace_index});
-trace_raw = double(bursting_sim_struct(coop_sim_index).sim_emission_cell{coop_plot_index,trace_index});
+time_raw = repelem(double(bursting_sim_struct(coop_sim_index).sim_time_cell{coop_plot_index,trace_index}),1);
+trace_raw = repelem(double(bursting_sim_struct(coop_sim_index).sim_emission_cell{coop_plot_index,trace_index}),1);
 
-stairs(time_raw/60, trace_raw,'Color',blue,'LineWidth',1.5);
+trace_rs = interp1(time_raw,trace_raw,time_rs,'previous');
+
+stairs(time_rs/60, trace_rs,'Color',[blue 0.0],'LineWidth',1.5);
 
 ylim(ylimTrace)
 xlim([0 t_max])
@@ -163,28 +166,10 @@ p = plot(0,0);
 % ax.XColor = 'black';
 StandardFigurePBoC(p,gca);
 state_fig.InvertHardcopy = 'off';
+
 saveas(state_fig,[FigurePath 'coop_trace.png'])
 saveas(state_fig,[FigurePath 'coop_trace.pdf'])
 
-
-state_fig_hr = figure;
-hold on
-stairs(time_raw/60, trace_raw,'Color',blue,'LineWidth',.75);
-
-ylim(ylimTrace)
-xlim([27 30])
-ylabel('transcription rate')
-xlabel('time (minutes)')
-box on
-set(gca,'Fontsize',14,'YTick',n_bound_vec)
-p = plot(0,0);
-% ax = gca;
-% ax.YColor = 'black';
-% ax.XColor = 'black';
-StandardFigurePBoC(p,gca);
-state_fig_hr.InvertHardcopy = 'off';
-saveas(state_fig_hr,[FigurePath 'coop_trace_hr.png'])
-saveas(state_fig_hr,[FigurePath 'coop_trace_hr.pdf'])
 
 % calculate fraction of time in eac state
 dur_vec = diff([time_raw t_max*60]);
@@ -230,7 +215,9 @@ hold on
 time_raw = double(bursting_sim_struct(rateLim_sim_index).sim_time_cell{rateLim_plot_index,trace_index});
 trace_raw = double(bursting_sim_struct(rateLim_sim_index).sim_emission_cell{rateLim_plot_index,trace_index});
 
-stairs(time_raw/60, trace_raw,'Color',red,'LineWidth',1.5);
+trace_rs = interp1(time_raw,trace_raw,time_rs,'previous');
+
+stairs(time_rs/60, trace_rs,'Color',red,'LineWidth',1.5);
 
 ylim(ylimTrace)
 xlim([0 t_max])

@@ -10,7 +10,7 @@ addpath('utilities')
 % define basic hyperparameters and symbols
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-n_bs = 2; % number of Bcd binding sites
+n_bs = 6; % number of Bcd binding sites
 n_states = n_bs + 1; % total number of states
 n_bound_vec = 0:n_bs; % vector encoding # bound in each state
 off_rate_basal = 1/2; % in seconds. This sets overall system timescales (from Mir et al, 2018)
@@ -269,7 +269,10 @@ for n =1:length(rate_lim_steps_vec)
     % enforce proper form
     Q_slice(eye(size(Q_slice))==1) = 0;
     Q_slice(eye(size(Q_slice))==1) = -sum(Q_slice);
-    Q_rate_lim_array(:,:,eb) = Q_slice';    
+    Q_rate_lim_array(:,:,eb) = Q_slice';   
+    if eb==196 && rate_lim_steps_vec(n)==2
+      error('asfa')
+    end
   end
   
   % record
