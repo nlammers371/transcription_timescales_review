@@ -6,7 +6,6 @@ addpath('utilities')
 
 % load numeric results
 project = 'n6';
-addpath('utilities')
 
 % set paths
 DataPath = ['../out/emergent_bursting/' project '/'];
