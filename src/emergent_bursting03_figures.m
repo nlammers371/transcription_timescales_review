@@ -148,8 +148,7 @@ p = plot(0,0);
 StandardFigurePBoC(p,gca);
 state_fig.InvertHardcopy = 'off';
 
-saveas(state_fig,[FigurePath 'coop_trace.png'])
-saveas(state_fig,[FigurePath 'coop_trace.pdf'])
+
 
 
 % calculate fraction of time in eac state
