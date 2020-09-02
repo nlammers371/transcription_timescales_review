@@ -50,7 +50,7 @@ coop_sim_index = find(contains(sim_name_cell,'koff-mediated'));
 coop_plot_index = 1; 
 sim_param_indices_coop = 176:4:201;
 % plot results of stochastic simulations
-trace_index = 16; 
+trace_index = 3;%3
 
 state_fig = figure;
 cmap2 = brewermap(9,'Set2');
@@ -76,3 +76,68 @@ state_fig.InvertHardcopy = 'off';
 
 saveas(state_fig,[FigurePath 'coop_trace.png'])
 saveas(state_fig,[FigurePath 'coop_trace.pdf'])
+
+% calculate fraction of time in eac state
+dur_vec = diff([time_raw t_max*60]);
+stateSums = accumarray(trace_raw'+1,dur_vec');
+stateShares = stateSums/sum(stateSums);
+
+hist_fig = figure('Position',[100 100 256 512]);
+hold on
+barh(n_bound_vec,stateShares,1,'FaceColor',blue);
+  
+xlabel('probability')
+box on
+p = plot(0,0);
+% ax = gca;
+% ax.YColor = 'black';
+xlim([0 0.55])
+% ax.XColor = 'black';
+set(gca,'Fontsize',14,'xtick',0:.25:.5)
+ylim([n_bound_vec(1)-0.5 n_bound_vec(end)+0.5])
+StandardFigurePBoC(p,gca);
+
+hist_fig.InvertHardcopy = 'off';
+saveas(hist_fig,[FigurePath 'coop_hist.png'])
+saveas(hist_fig,[FigurePath 'coop_hist.pdf'])
+
+%% make bar plots of effective on and off rates
+% define matrices to use for
+n = 0:n_bcd_sites;
+n_states = length(n);
+a = ones(n_states); m1 = tril(a,-1); m2 = tril(a,-2); m3 = triu(a,1); m4 = triu(a,2); m5 = ~~eye(n_states);
+% extract transition rate matrix
+Q = bursting_sim_struct(coop_sim_index).Q(:,:,coop_plot_index)';
+k_minus_vec = [0 Q(m3&~m4)'];
+k_plus_vec = [Q(m1&~m2)' 0];
+
+% make on rate bar plot
+kp_fig = figure;
+bar(n,k_plus_vec,.3,'b')
+xlabel('number of bound molecules')
+ylabel('k_{+} (1/s)')
+%ylabel('k_{+}')
+set(gca,'YTick',[0.01 1 10^2])
+ylim([0.01,10^2])
+set(gcf,'position',[0, 0, 0.5600, 0.1560]*1E3)
+set(gca,'YScale','log')
+StandardFigure([],gca)
+kp_fig.InvertHardcopy = 'off';
+saveas(kp_fig,[FigurePath 'kp_bars.png'])
+saveas(kp_fig,[FigurePath 'kp_bars.pdf'])
+
+
+km_fig = figure;
+bar(n,k_minus_vec,.3,'b')
+xlabel('number of bound molecules')q
+ylabel('k_{-} (1/s)')
+%ylabel('k_{+}')
+set(gca,'YTick',[0.01 1 10^2])
+ylim([0.01,10^2])
+set(gcf,'position',[0,0, 0.5600, 0.1560]*1E3)
+set(gca,'YScale','log')
+StandardFigure([],gca)
+km_fig.InvertHardcopy = 'off';
+saveas(km_fig,[FigurePath 'km_bars.png'])
+saveas(km_fig,[FigurePath 'km_bars.pdf'])
+

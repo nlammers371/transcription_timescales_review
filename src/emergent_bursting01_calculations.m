@@ -118,6 +118,9 @@ for eb = 1:length(activatorEnergyVec)
   rate_coop_off_temp(2:end,1) = rate_coop_off_temp(1:end-1,2)' .* state_probs_coop(1:end-1) ./ state_probs_coop(2:end); 
   
   % re-adjust rates to ensure consistency with experimental measurements
+  % this WILL NOT yield average microscopic rate (taken across all events)
+  % will be precisely equal to Mir2018 cvalue but it will ensure that 
+  % micrsocopic rates out of each state are on a reasonably scale
   propensity_vec = rate_coop_off_temp(2:end,1)';
   basal_vec = rate_coop_off_temp(2:end,1)'./n_bound_vec(2:end);
   af = off_rate_basal/(sum(state_probs_coop(2:end).*basal_vec)/sum(state_probs_coop(2:end)));
