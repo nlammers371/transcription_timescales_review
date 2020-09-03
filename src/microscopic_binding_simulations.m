@@ -51,7 +51,7 @@ k_unbind_vec(1) = 0;
 k_bind_vec = k_plus_vec ./(n_bcd_sites-n_vec);
 k_bind_vec(end) = 0;
 
-% build model
+%% build model
 n_sim = 10; % number of simulations
 T = 1e4; % total time to simulate in seconds
 % cell arrays to store results
@@ -106,7 +106,7 @@ for n = 1:n_sim
   
 end
 
-% extract single-molecules unbinding times
+%% extract single-molecules unbinding times
 unbinding_vec = [];
 binding_vec = [];
 for n = 1:n_sim
