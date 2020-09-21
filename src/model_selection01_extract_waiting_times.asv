@@ -75,19 +75,24 @@ toc
 
 %% %%%%%%%%%%%%%%%%%%% Extract waiting times %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
 % set basic parameters
+n_bootstraps = 25;
 emergent_indices = 1:2;
 rate_lim_indices = 3:length(bursting_sim_struct);
 sim_indices = [emergent_indices rate_lim_indices];
 
 dT = 5; % time res for interpolated data in seconds (effectively our experimental time res)
+
+time_vector = 0:dT:60*60;
 n_bound_vec = 0:6;
 n_bs = 6;
+
 waiting_time_struct = struct;
 iter = 1;
-
 for s = sim_indices
   
-  sub_index_vec = 1:size(bursting_sim_struct(s).SS,2);    
+  sub_index_vec = 1:size(bursting_sim_struct(s).SS,2);
+  n_sim = size(bursting_sim_struct(1).sim_time_cell,2); % number of independent simulations
+    
   wt_off_cell_ideal = cell(1,length(sim_indices));
 
   for i = 1:length(sub_index_vec)    
@@ -119,7 +124,8 @@ for s = sim_indices
   end
 
   % store results in a data structure    
-  waiting_time_struct(iter).trace_array = trace_array; 
+  waiting_time_struct(iter).trace_array = trace_array;
+  waiting_time_struct(iter).time_vector = time_vector;  
   waiting_time_struct(iter).off_waiting_times_ideal = wt_off_cell_ideal;
   waiting_time_struct(iter).name = bursting_sim_struct(s).name;
   iter = iter + 1;
