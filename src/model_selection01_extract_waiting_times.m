@@ -27,8 +27,9 @@ t_sim = 20*60*60; % duration of each simulation (in seconds)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 p = gcp('nocreate');
 if isempty(p)
-  parpool(24);
+  parpool(4);
 end
+
 %%%%%%%%%%%%%%%%%%%%%%%
 % cooperative binding
 %%%%%%%%%%%%%%%%%%%%%%%
