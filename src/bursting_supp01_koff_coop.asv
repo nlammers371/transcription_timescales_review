@@ -101,37 +101,36 @@ hist_fig.InvertHardcopy = 'off';
 saveas(hist_fig,[FigurePath 'coop_hist.png'])
 saveas(hist_fig,[FigurePath 'coop_hist.pdf'])
 
-% %%
-% % use mean dwell time inferred from exponential fit (see supp02)
-% % mu = 0.23;
-% upper_bound = 1;
-% del_indices = find([diff(time_raw) 0]>=upper_bound & [diff(trace_raw) 0]==-1);
-% time_raw_trunc = time_raw;
-% for d = 1:length(del_indices)
-%   deltaT = time_raw_trunc(del_indices(d)+1)-time_raw_trunc(del_indices(d))-upper_bound;
-%   time_raw_trunc(del_indices(d)+1:end) = time_raw_trunc(del_indices(d)+1:end)-deltaT;
-% end
-% 
-% state_fig2 = figure;
-% cmap2 = brewermap(9,'Set2');
-% hold on
-% time_rs2 = 0:resamp_res:max(time_raw_trunc);
-% trace_rs2 = interp1(time_raw_trunc,trace_raw,time_rs2,'previous');
-% 
-% stairs(time_rs2/60, trace_rs2,'Color',[blue 0.0],'LineWidth',1.5);
-% 
-% ylim(ylimTrace)
-% xlim([0 max(time_rs2)/60])
-% ylabel('transcription rate')
-% xlabel('time (minutes)')
-% box on
-% set(gca,'Fontsize',14,'YTick',n_bound_vec)
-% p = plot(0,0);
-% StandardFigurePBoC(p,gca);
-% state_fig2.InvertHardcopy = 'off';
-% 
-% saveas(state_fig2,[FigurePath 'coop_trace_trunc.png'])
-% saveas(state_fig2,[FigurePath 'coop_trace_trunc.pdf'])
+%%
+% use mean dwell time inferred from exponential fit (see supp02)
+
+del_indices = find([diff(time_raw) 0]>=0.23 & trace_raw==6);
+time_raw_trunc = time_raw;
+for d = 1:length(del_indices)
+  deltaT = time_raw_trunc(del_indices(d)+1)-time_raw_trunc(del_indices(d))+1;
+  time_raw_trunc(del_indices(d)+1:end) = time_raw_trunc(del_indices(d)+1:end)-deltaT;
+end
+
+state_fig2 = figure;
+cmap2 = brewermap(9,'Set2');
+hold on
+time_rs2 = 0:resamp_res:max(time_raw_trunc);
+trace_rs2 = interp1(time_raw_trunc,trace_raw,time_rs2,'previous');
+
+stairs(time_rs2/60, trace_rs2,'Color',[blue 0.0],'LineWidth',1.5);
+
+ylim(ylimTrace)
+xlim([0 max(time_rs2)/60])
+ylabel('transcription rate')
+xlabel('time (minutes)')
+box on
+set(gca,'Fontsize',14,'YTick',n_bound_vec)
+p = plot(0,0);
+StandardFigurePBoC(p,gca);
+state_fig.InvertHardcopy = 'off';
+
+saveas(state_fig2,[FigurePath 'coop_trace_trunc.png'])
+saveas(state_fig2,[FigurePath 'coop_trace_trunc.pdf'])
 % 
 % % calculate fraction of time in eac state
 % dur_vec = diff([time_raw t_max*60]);
